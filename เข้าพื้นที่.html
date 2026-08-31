@@ -20,38 +20,38 @@
         .container {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 24px;
             width: 100%;
-            max-width: 820px;
-            padding: 30px;
+            max-width: 1100px;
+            padding: 40px;
             box-sizing: border-box;
         }
 
         .page-header {
             background: linear-gradient(145deg, #18181b, #121215);
             border: 1px solid rgba(244, 63, 94, 0.2);
-            padding: 18px 24px;
-            border-radius: 16px;
+            padding: 22px 30px;
+            border-radius: 18px;
             text-align: center;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: 600;
             color: #f43f5e;
-            box-shadow: 0 10px 25px -5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
+            box-shadow: 0 12px 30px -5px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 10px;
+            gap: 12px;
         }
 
         .form-card {
             background: linear-gradient(145deg, #18181b, #111114);
             border: 1px solid rgba(255, 255, 255, 0.05);
-            padding: 36px;
-            border-radius: 16px;
-            box-shadow: 0 16px 32px -8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
+            padding: 45px;
+            border-radius: 18px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 28px;
         }
 
         .form-group {
@@ -61,52 +61,58 @@
 
         .form-group label {
             display: block;
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: 10px;
+            font-size: 15px;
             color: #f4f4f5;
             font-weight: 500;
         }
 
         .form-group input {
             width: 100%;
-            padding: 14px 18px;
+            padding: 16px 20px;
             background-color: #09090b;
             border: 1px solid #27272a;
-            border-radius: 12px;
+            border-radius: 14px;
             color: #ffffff;
             font-family: 'Prompt', sans-serif;
-            font-size: 14px;
+            font-size: 15px;
             box-sizing: border-box;
             outline: none;
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
             transition: all 0.3s ease;
-            margin-bottom: 12px;
         }
 
         .form-group input:focus {
             border-color: #f43f5e;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 10px rgba(244, 63, 94, 0.2);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 12px rgba(244, 63, 94, 0.25);
+        }
+
+        .form-group input[readonly] {
+            background-color: #121216;
+            color: #10b981;
+            font-weight: 600;
+            cursor: not-allowed;
         }
 
         .dropdown-list {
             position: absolute;
-            top: calc(100% - 4px);
+            top: calc(100% + 4px);
             left: 0;
             right: 0;
             background: #09090b;
             border: 1px solid #27272a;
-            border-radius: 12px;
-            max-height: 200px;
+            border-radius: 14px;
+            max-height: 240px;
             overflow-y: auto;
             z-index: 10;
             display: none;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+            box-shadow: 0 12px 24px rgba(0,0,0,0.7);
         }
 
         .dropdown-item {
-            padding: 12px 18px;
+            padding: 14px 20px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 15px;
             color: #ffffff;
             border-bottom: 1px solid rgba(255,255,255,0.03);
             transition: background 0.2s;
@@ -118,10 +124,10 @@
         }
 
         .section-title {
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
             color: #f4f4f5;
-            margin: 8px 0 6px 0;
+            margin: 10px 0 8px 0;
             display: flex;
             align-items: center;
             gap: 8px;
@@ -130,24 +136,24 @@
         .preview-box {
             background-color: #09090b;
             border: 1px solid #27272a;
-            padding: 18px;
-            border-radius: 12px;
-            font-size: 14px;
-            color: #a1a1aa;
+            padding: 22px;
+            border-radius: 14px;
+            font-size: 15px;
+            color: #cbd5e1;
             white-space: pre-wrap;
             word-break: break-word;
-            line-height: 1.6;
-            min-height: 60px;
-            box-shadow: inset 0 2px 5px rgba(0,0,0,0.6);
+            line-height: 1.7;
+            min-height: 80px;
+            box-shadow: inset 0 2px 6px rgba(0,0,0,0.6);
         }
 
         .btn-action {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             border: none;
-            border-radius: 12px;
+            border-radius: 14px;
             font-family: 'Prompt', sans-serif;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -156,37 +162,37 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            box-shadow: 0 6px 15px rgba(244, 63, 94, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
+            gap: 10px;
+            box-shadow: 0 8px 20px rgba(244, 63, 94, 0.4), inset 0 1px 0 rgba(255,255,255,0.2);
         }
 
         .btn-action:hover {
             background: linear-gradient(135deg, #fb7185, #f43f5e);
-            box-shadow: 0 8px 20px rgba(244, 63, 94, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
+            box-shadow: 0 10px 25px rgba(244, 63, 94, 0.6), inset 0 1px 0 rgba(255,255,255,0.3);
             transform: translateY(-1px);
         }
 
         .btn-action.success {
             background: linear-gradient(135deg, #10b981, #059669) !important;
-            box-shadow: 0 6px 15px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255,255,255,0.2) !important;
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4), inset 0 1px 0 rgba(255,255,255,0.2) !important;
         }
 
         #toast {
             visibility: hidden;
-            min-width: 200px;
+            min-width: 220px;
             background-color: #f43f5e;
             color: #fff;
             text-align: center;
-            border-radius: 10px;
-            padding: 12px;
+            border-radius: 12px;
+            padding: 14px;
             position: fixed;
             z-index: 1;
             left: 50%;
-            bottom: 30px;
+            bottom: 40px;
             transform: translateX(-50%);
-            font-size: 14px;
+            font-size: 15px;
             font-weight: 500;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.5);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
         }
 
         #toast.show {
@@ -196,11 +202,11 @@
 
         @keyframes fadein {
             from { bottom: 0; opacity: 0; }
-            to { bottom: 30px; opacity: 1; }
+            to { bottom: 40px; opacity: 1; }
         }
 
         @keyframes fadeout {
-            from { bottom: 30px; opacity: 1; }
+            from { bottom: 40px; opacity: 1; }
             to { bottom: 0; opacity: 0; }
         }
     </style>
@@ -211,20 +217,27 @@
 
         <div class="page-header">
             <span>🚜</span>
-            <span>ประกาศเข้าพื้นที่</span>
+            <span>ระบบประกาศเข้าพื้นที่</span>
         </div>
 
         <div class="form-card">
+            <!-- ช่องที่ 1: ค้นหารหัส / หมายเลขสถานที่ -->
             <div class="form-group">
-                <label for="locationInput">ค้นหาหรือพิมพ์ระบุบริเวณสถานที่ :</label>
-                <input type="text" id="locationInput" placeholder="พิมพ์ค้นหาชื่อสถานที่..." autocomplete="off" oninput="onLocationInput()" onfocus="showDropdown()">
+                <label for="numberInput">หมายเลขสถานที่ </label>
+                <input type="text" id="numberInput" placeholder="พิมพ์ตัวเลข เช่น 1, 2..." autocomplete="off" oninput="onNumberInput()" onfocus="showDropdown()">
                 <div id="dropdownList" class="dropdown-list"></div>
+            </div>
+
+            <!-- ช่องที่ 2: ชื่อสถานที่ (แสดงอัตโนมัติ) -->
+            <div class="form-group">
+                <label for="locationNameInput"> ชื่อสถานที่ </label>
+                <input type="text" id="locationNameInput" placeholder="ชื่อสถานที่..." readonly>
             </div>
 
             <div>
                 <div class="section-title">📝 ข้อความสำหรับประกาศเข้าพื้นที่:</div>
                 <div id="previewBox" class="preview-box"></div>
-                <div style="margin-top: 14px;">
+                <div style="margin-top: 18px;">
                     <button id="btnCopy" class="btn-action" onclick="copyText()">📋 คัดลอกข้อความ</button>
                 </div>
             </div>
@@ -252,14 +265,14 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const locationInput = document.getElementById('locationInput');
+        const numberInput = document.getElementById('numberInput');
+        const locationNameInput = document.getElementById('locationNameInput');
         const dropdownList = document.getElementById('dropdownList');
         const previewBox = document.getElementById('previewBox');
         const btnCopy = document.getElementById('btnCopy');
 
         let locationsData = [];
 
-        // เชื่อมต่อและดึงข้อมูลจาก Firebase แบบ Real-time โหนด aroundTown
         onValue(ref(db, 'aroundTown'), (snapshot) => {
             const data = snapshot.val() || {};
             locationsData = data.locations || [];
@@ -268,37 +281,62 @@
             console.error("Firebase connection error: ", error);
         });
 
+        function parseLocationItem(fullName) {
+            if (!fullName) return { num: '', name: '' };
+            const match = fullName.trim().match(/^(\d+)[\s\.\-]*(.*)$/);
+            if (match) {
+                return { num: match[1], name: match[2].trim() };
+            }
+            return { num: '', name: fullName.trim() };
+        }
+
         window.showDropdown = function() {
             renderDropdownItems();
             dropdownList.style.display = 'block';
         }
 
-        window.onLocationInput = function() {
+        window.onNumberInput = function() {
             renderDropdownItems();
             dropdownList.style.display = 'block';
+            
+            const keyword = numberInput.value.trim();
+            const found = locationsData.find(loc => {
+                const parsed = parseLocationItem(loc.name);
+                return parsed.num === keyword;
+            });
+
+            if (found) {
+                const parsed = parseLocationItem(found.name);
+                locationNameInput.value = parsed.name;
+            } else {
+                locationNameInput.value = '';
+            }
             updatePreview();
         }
 
         function renderDropdownItems() {
-            const keyword = locationInput.value.toLowerCase().trim();
+            const keyword = numberInput.value.toLowerCase().trim();
             const filtered = locationsData.filter(loc => {
                 if (!loc || !loc.name) return false;
-                return loc.name.toLowerCase().includes(keyword);
+                const parsed = parseLocationItem(loc.name);
+                return parsed.num.toLowerCase().includes(keyword) || loc.name.toLowerCase().includes(keyword);
             });
 
             dropdownList.innerHTML = '';
 
             if (filtered.length === 0) {
-                dropdownList.innerHTML = '<div class="dropdown-item" style="color: #71717a; cursor: default;">ไม่พบสถานที่ในระบบ</div>';
+                dropdownList.innerHTML = '<div class="dropdown-item" style="color: #71717a; cursor: default;">ไม่พบหมายเลขในระบบ</div>';
                 return;
             }
 
             filtered.forEach(loc => {
+                const parsed = parseLocationItem(loc.name);
                 const item = document.createElement('div');
                 item.className = 'dropdown-item';
-                item.textContent = loc.name;
+                item.textContent = `${parsed.num} : ${parsed.name}`;
                 item.onclick = function() {
-                    locationInput.value = loc.name;
+                    numberInput.value = parsed.num;
+                    locationNameInput.value = parsed.name;
                     dropdownList.style.display = 'none';
                     updatePreview();
                 };
@@ -306,33 +344,27 @@
             });
         }
 
-        // ซ่อน Dropdown เมื่อคลิกนอกพื้นที่ช่องค้นหา
         document.addEventListener('click', function(e) {
-            if (!locationInput.contains(e.target) && !dropdownList.contains(e.target)) {
+            if (!numberInput.contains(e.target) && !dropdownList.contains(e.target)) {
                 dropdownList.style.display = 'none';
             }
         });
 
-        function getLocation() {
-            return locationInput.value.trim() || '.....';
-        }
-
         function getTargetTime() {
             const now = new Date();
-            now.setMinutes(now.getMinutes() + 2); // บวกเพิ่ม 2 นาที
+            now.setMinutes(now.getMinutes() + 2);
             
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            return `${hours} : ${minutes}`;
+            return `${hours}:${minutes}`; // ปรับให้ชิดกันไม่มีช่องว่าง
         }
 
         function updatePreview() {
-            const loc = getLocation();
+            const loc = locationNameInput.value.trim() || '.....';
             const timeStr = getTargetTime();
             previewBox.textContent = `ขณะนี้หมอกำลังจะทำการเข้าพื้นที่สตอรี่ บริเวณ ${loc} ขอให้ผู้ที่อยู่ในพื้นที่ ที่มีสตอรี่ออกจากพื้นที่ก่อนเวลา ${timeStr} น. ขอบคุณค่ะ/ครับ`;
         }
 
-        // อัปเดตเวลาถอยหลังแบบเรียลไทม์ทุกๆ 1 วินาที
         updatePreview();
         setInterval(updatePreview, 1000);
 
