@@ -3,331 +3,331 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบประกาศโรงพยาบาล Around Town</title>
+    <title>Hospital Cooldown System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #121212;
-            --card-bg: #1e1e1e;
-            --input-bg: #262626;
-            --border-color: #333333;
-            --primary-color: #ff4757;
-            --primary-hover: #ff6b81;
-            --text-color: #ffffff;
-            --text-muted: #a1a1aa;
+            --bg-color: #0f070f;
+            --card-bg: #140814;
+            --accent-color: #db2777;
+            --accent-hover: #be185d;
+            --text-color: #f1f5f9;
+            --text-muted: #f472b680;
+            --border-color: rgba(131, 24, 93, 0.4);
+            --danger-color: #f43f5e;
+            --success-color: #2ecc71;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Prompt', sans-serif;
         }
 
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 15px;
             min-height: 100vh;
-            box-sizing: border-box;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
         }
 
         .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 20px 24px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
-            border: 1px solid var(--border-color);
+            width: 100%;
+            max-width: 900px;
         }
 
-        h2 {
-            text-align: center;
-            color: var(--primary-color);
-            margin: 0 0 15px 0;
-            font-size: 22px;
-        }
-
-        .nav-tabs {
+        /* Navigation Bar */
+        .navbar {
             display: flex;
             justify-content: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-
-        .nav-tab {
-            background: var(--input-bg);
+            gap: 12px;
+            background: var(--card-bg);
+            padding: 12px;
+            border-radius: 16px;
+            margin-bottom: 25px;
             border: 1px solid var(--border-color);
-            color: var(--text-muted);
-            padding: 8px 24px;
-            border-radius: 6px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
+        }
+
+        .nav-btn {
+            background: transparent;
+            border: none;
+            color: #f472b6b3;
+            padding: 10px 24px;
+            font-size: 15px;
+            font-weight: 500;
+            border-radius: 10px;
             cursor: pointer;
-            font-weight: bold;
-            transition: all 0.2s;
-            font-size: 14px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
-        .nav-tab.active {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
+        .nav-btn:hover {
+            color: var(--text-color);
+            background: rgba(219,39,119,0.1);
         }
 
-        .tab-content {
+        .nav-btn.active {
+            background: var(--accent-color);
+            color: #ffffff;
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(219,39,119,0.5);
+        }
+
+        /* Pages */
+        .page {
             display: none;
         }
 
-        .tab-content.active {
+        .page.active {
             display: block;
+            animation: fadeIn 0.4s ease;
         }
 
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 24px;
-            align-items: start;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .form-column {
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
+        /* Cards & Forms */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 0 15px rgba(0,0,0,0.5);
         }
 
         .form-group {
-            width: 100%;
-        }
-
-        .preview-group {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            background: rgba(0, 0, 0, 0.2);
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
+            margin-bottom: 18px;
+            position: relative;
         }
 
         label {
             display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-            color: #d1d5db;
-            font-size: 13px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #f472b6;
         }
 
         input, select, textarea {
             width: 100%;
-            padding: 10px 12px;
-            background: var(--input-bg);
+            padding: 12px 16px;
+            background: #100510;
             border: 1px solid var(--border-color);
+            border-radius: 10px;
             color: var(--text-color);
-            border-radius: 6px;
-            box-sizing: border-box;
-            font-size: 14px;
-        }
-
-        input:focus, select:focus, textarea:focus {
+            font-size: 15px;
             outline: none;
-            border-color: var(--primary-color);
+            transition: border-color 0.3s;
         }
 
-        .preview-box {
-            background: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 12px;
-            font-family: monospace;
-            white-space: pre-wrap;
-            word-break: break-all;
-            color: #e2e8f0;
-            font-size: 13px;
-            line-height: 1.5;
-            min-height: 70px;
-            max-height: 180px;
-            overflow-y: auto;
+        input:focus, select:focus {
+            border-color: var(--accent-color);
         }
 
+        /* Buttons */
         .btn-action {
-            background: var(--primary-color);
-            color: white;
+            background: var(--accent-color);
+            color: #ffffff;
             border: none;
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
-            font-weight: bold;
+            transition: all 0.3s;
             width: 100%;
-            transition: background 0.2s;
-            font-size: 13px;
+            font-size: 15px;
+            box-shadow: 0 0 10px rgba(219,39,119,0.4);
         }
 
         .btn-action:hover {
-            background: var(--primary-hover);
+            background: var(--accent-hover);
+            transform: translateY(-1px);
         }
 
-        .btn-action.success {
-            background: #2ed573 !important;
+        .btn-delete {
+            background: rgba(244, 63, 94, 0.2);
+            color: var(--danger-color);
+            border: 1px solid rgba(244, 63, 94, 0.4);
+            padding: 6px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: #333;
+        .btn-delete:hover {
+            background: var(--danger-color);
             color: #fff;
-            text-align: center;
-            border-radius: 6px;
-            padding: 12px;
-            position: fixed;
-            z-index: 1000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
-        #toast.show {
-            visibility: visible;
-            animation: fadein 0.5s, fadeout 0.5s 1.5s;
+        .btn-success-flash {
+            background: var(--success-color) !important;
+            color: #fff !important;
+            box-shadow: 0 0 10px rgba(46, 204, 113, 0.4) !important;
         }
 
-        @keyframes fadein {
-            from { bottom: 0; opacity: 0; }
-            to { bottom: 30px; opacity: 1; }
+        /* Time Buttons Grid */
+        .time-buttons-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+            gap: 10px;
+            margin-top: 5px;
         }
 
-        @keyframes fadeout {
-            from { bottom: 30px; opacity: 1; }
-            to { bottom: 0; opacity: 0; }
-        }
-
-        .history-item {
-            background: var(--input-bg);
+        .time-btn {
+            background: #100510;
             border: 1px solid var(--border-color);
-            border-radius: 6px;
-            padding: 14px;
-            margin-bottom: 12px;
+            color: var(--text-color);
+            padding: 10px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
         }
 
-        .history-content {
+        .time-btn.active {
+            background: var(--accent-color);
+            color: #ffffff;
+            border-color: var(--accent-color);
+            font-weight: 600;
+            box-shadow: 0 0 10px rgba(219,39,119,0.5);
+        }
+
+        /* Preview Box */
+        .preview-box {
+            background: #100510;
+            border: 1px dashed var(--border-color);
+            padding: 15px;
+            border-radius: 10px;
             font-family: monospace;
             white-space: pre-wrap;
-            font-size: 13px;
-            margin-bottom: 10px;
-            background: #111;
-            padding: 10px;
-            border-radius: 4px;
+            margin-bottom: 12px;
+            color: #fbcfe8;
+            font-size: 14px;
         }
 
-        .history-footer {
+        /* Search Dropdown */
+        .search-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: #140814;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            margin-top: 4px;
+            max-height: 180px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        .search-dropdown-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid rgba(131, 24, 93, 0.2);
+            transition: background 0.2s;
+            color: #f1f5f9;
+        }
+
+        .search-dropdown-item:hover {
+            background: rgba(219,39,119,0.2);
+            color: #f472b6;
+        }
+
+        /* History items */
+        .history-item {
+            background: #100510;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            align-items: flex-start;
+            gap: 15px;
         }
 
-        .empty-history {
-            text-align: center;
-            color: var(--text-muted);
-            padding: 30px;
+        .history-time {
+            font-size: 12px;
+            color: #f472b6b3;
+            margin-bottom: 6px;
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>🏥 ระบบประกาศโรงพยาบาล Around Town</h2>
-
-    <div class="nav-tabs">
-        <div class="nav-tab active" onclick="switchTab('create')"> สร้างประกาศ</div>
-        <div class="nav-tab" onclick="switchTab('history')"> ประวัติการประกาศ (<span id="historyCount">0</span>)</div>
+    <!-- Navigation Bar -->
+    <div class="navbar">
+        <button class="nav-btn active" onclick="switchPage(1)"> ประกาศ Cooldown</button>
+        <button class="nav-btn" onclick="switchPage(2)"> ประวัติประกาศ</button>
     </div>
 
-    <!-- Tab 1: สร้างประกาศ -->
-    <div id="tabCreate" class="tab-content active">
-        <div class="form-grid">
-            <!-- คอลัมน์ซ้าย: ฟอร์มกรอกข้อมูล -->
-            <div class="form-column">
-                <div class="form-group">
-                    <label for="noticeType">ประเภทประกาศ :</label>
-                    <select id="noticeType" onchange="toggleNoticeFields()">
-                        <option value="ตักเตือน">ประกาศตักเตือน</option>
-                        <option value="Blacklist">ประกาศ Blacklist</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="groupTargetType">
-                    <label for="targetType">เป้าหมาย :</label>
-                    <select id="targetType" onchange="onTargetTypeChange()">
-                        <option value="แก๊ง">แก๊ง</option>
-                        <option value="ครอบครัว">ครอบครัว</option>
-                        <option value="คุณ">บุคคล</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="targetNameSearch" id="targetNameLabel">แก๊ง :</label>
-                    <input type="text" id="targetNameSearch" list="targetNameList" placeholder="พิมพ์ชื่อหรือเลือก...">
-                    <datalist id="targetNameList"></datalist>
-                </div>
-
-                <div class="form-group" id="groupReason">
-                    <label for="fineReasonSearch">ข้อหา / หัวข้อ :</label>
-                    <input type="text" id="fineReasonSearch" list="fineReasonList" placeholder="พิมพ์เพื่อค้นหาข้อหา...">
-                    <datalist id="fineReasonList"></datalist>
-                </div>
-
-                <div class="form-group" id="groupAmount" style="display: none;">
-                    <label for="fineAmount">จำนวนเงินค่าปรับ :</label>
-                    <input type="text" id="fineAmount" placeholder="เช่น 5,000,000 หรือ 10 / ตักเตือน" oninput="formatFineInput(this); updatePreviews()">
-                </div>
-
-                <div class="form-group" id="groupWarning">
-                    <label for="warningLevel">ระดับการเตือน :</label>
-                    <select id="warningLevel">
-                        <option value="เตือนครั้งที่ 1">เตือนครั้งที่ 1</option>
-                        <option value="เตือนครั้งที่ 2">เตือนครั้งที่ 2</option>
-                        <option value="เตือนครั้งที่ 3">เตือนครั้งที่ 3</option>
-                    </select>
-                </div>
-
-                <div class="form-group" id="groupStatus" style="display: none;">
-                    <label for="paymentStatus">สถานะการชำระเงิน :</label>
-                    <select id="paymentStatus" onchange="updatePreviews()">
-                        <option value="ยังไม่ชำระ">ยังไม่ชำระ</option>
-                        <option value="ชำระแล้ว">ชำระแล้ว </option>
-                    </select>
-                </div>
+    <!-- Page 1: Cooldown Generator -->
+    <div id="page1" class="page active">
+        <div class="card">
+            <h2 style="margin-bottom: 20px; font-size: 20px; color: var(--accent-color); text-align: center;">🏥 สร้างประกาศ Cooldown โรงพยาบาล</h2>
+            
+            <div class="form-group">
+                <label>ประเภท</label>
+                <select id="targetType" onchange="onTypeChange()">
+                    <option value="แก๊ง">แก๊ง</option>
+                    <option value="ครอบครัว">ครอบครัว</option>
+                    <option value="ประชาชน">ประชาชน</option>
+                </select>
             </div>
 
-            <!-- คอลัมน์ขวา: พรีวิวและปุ่มคัดลอก -->
-            <div class="form-column">
-                <div class="preview-group">
-                    <label>📄 ข้อความสำหรับในเกม</label>
-                    <div id="previewGame" class="preview-box"></div>
-                    <button class="btn-action" id="btnGame" onclick="copyGameText()">📋 คัดลอกข้อความในเกม</button>
-                </div>
+            <div class="form-group">
+                <label>ชื่อแก๊ง / ประชาชน:</label>
+                <input type="text" id="targetNameInput" placeholder="คลิกเพื่อเลือก หรือพิมพ์ค้นหา/พิมพ์ชื่อเองได้เลย..." 
+                       onfocus="showDropdown()" oninput="onSearchInput()" autocomplete="off">
+                <div id="searchDropdown" class="search-dropdown"></div>
+            </div>
 
-                <div class="preview-group">
-                    <label>💬 ข้อความสำหรับDiscord</label>
-                    <div id="previewDiscord" class="preview-box"></div>
-                    <button class="btn-action" id="btnDiscord" onclick="copyDiscordText()">📋 คัดลอกข้อความ Discord</button>
-                </div>
+            <div class="form-group">
+                <label>เลือกระยะเวลา Cooldown:</label>
+                <div id="timeButtonsContainer" class="time-buttons-grid"></div>
+            </div>
+
+            <div class="form-group" style="margin-top: 25px;">
+                <label>🎮 ข้อความสำหรับในเกม</label>
+                <div id="gamePreview" class="preview-box"></div>
+                <button class="btn-action" onclick="copyAndLog('game', this)">📋 คัดลอกข้อความในเกม</button>
+            </div>
+
+            <div class="form-group" style="margin-top: 20px;">
+                <label>💬 ข้อความสำหรับดิส </label>
+                <div id="discordPreview" class="preview-box"></div>
+                <button class="btn-action" onclick="copyAndLog('discord', this)">📋 คัดลอกข้อความ Discord</button>
             </div>
         </div>
     </div>
 
-    <!-- Tab 2: ประวัติการประกาศ -->
-    <div id="tabHistory" class="tab-content">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-            <h3 style="margin: 0; font-size: 16px;">ประวัติย้อนหลัง</h3>
-            <button class="btn-action" style="width: auto; background: #e74c3c; padding: 6px 14px; margin-top: 0; font-size: 12px;" onclick="clearHistory()">🗑️ ล้างประวัติทั้งหมด</button>
+    <!-- Page 2: History -->
+    <div id="page2" class="page">
+        <div class="card">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 style="font-size: 20px; color: var(--accent-color);">📜 ประวัติการประกาศ</h2>
+                <button class="btn-delete" onclick="clearHistory()" style="padding: 8px 14px;">🗑️ ลบประวัติทั้งหมด</button>
+            </div>
+            <div id="historyContainer"></div>
         </div>
-        <div id="historyList"></div>
     </div>
 </div>
 
-<div id="toast">ดำเนินการสำเร็จ</div>
-
-<!-- Firebase SDK Import -->
 <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
     const firebaseConfig = {
         apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
@@ -343,381 +343,239 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    const noticeTypeSelect = document.getElementById('noticeType');
-    const targetTypeSelect = document.getElementById('targetType');
-    const targetNameLabel = document.getElementById('targetNameLabel');
-    const targetNameSearch = document.getElementById('targetNameSearch');
-    const targetNameList = document.getElementById('targetNameList');
-    const fineReasonSearch = document.getElementById('fineReasonSearch');
-    const fineReasonList = document.getElementById('fineReasonList');
-    const fineAmountInput = document.getElementById('fineAmount');
-    const warningLevelSelect = document.getElementById('warningLevel');
-    const paymentStatusSelect = document.getElementById('paymentStatus');
+    let citizensData = [];
+    const availableTimes = [3, 5];
+    let selectedDuration = 3;
+    let historyList = JSON.parse(localStorage.getItem('hospital_cooldown_history')) || [];
 
-    const groupTargetType = document.getElementById('groupTargetType');
-    const groupAmount = document.getElementById('groupAmount');
-    const groupWarning = document.getElementById('groupWarning');
-    const groupStatus = document.getElementById('groupStatus');
-
-    const previewGame = document.getElementById('previewGame');
-    const previewDiscord = document.getElementById('previewDiscord');
-
-    const btnGame = document.getElementById('btnGame');
-    const btnDiscord = document.getElementById('btnDiscord');
-
-    let historyData = [];
-    let rawCitizens = [];
-    let rawRules = [];
-
-    function formatFineInput(input) {
-        let val = input.value;
-        let parts = val.split('/');
-        let numStr = parts[0].replace(/[^\d]/g, '');
-        
-        if (numStr) {
-            let formattedNum = Number(numStr).toLocaleString('en-US');
-            if (parts.length > 1) {
-                input.value = formattedNum + ' / ' + parts.slice(1).join('/').trim();
+    function fetchCitizensFromFirebase() {
+        const citizensRef = ref(db, 'aroundTown/citizens');
+        onValue(citizensRef, (snapshot) => {
+            const data = snapshot.val();
+            if (data) {
+                citizensData = Object.keys(data).map(key => ({
+                    id: key,
+                    ...data[key]
+                }));
             } else {
-                let textAfterNum = val.replace(/[\d,]/g, '').trim();
-                if (textAfterNum && !val.includes('/')) {
-                    input.value = formattedNum + ' ' + textAfterNum;
-                } else {
-                    input.value = formattedNum;
-                }
+                citizensData = [];
             }
-        } else if (val.includes('/')) {
-            input.value = ' / ' + parts.slice(1).join('/').trim();
-        }
-        updatePreviews();
-    }
-    window.formatFineInput = formatFineInput;
-
-    function switchTab(tabName) {
-        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
-
-        if (tabName === 'create') {
-            document.getElementById('tabCreate').classList.add('active');
-            document.querySelectorAll('.nav-tab')[0].classList.add('active');
-        } else {
-            document.getElementById('tabHistory').classList.add('active');
-            document.querySelectorAll('.nav-tab')[1].classList.add('active');
-            renderHistory();
-        }
-    }
-    window.switchTab = switchTab;
-
-    function toggleNoticeFields() {
-        const type = noticeTypeSelect.value;
-        if (type === 'ตักเตือน') {
-            groupTargetType.style.display = 'block';
-            groupAmount.style.display = 'none';
-            groupWarning.style.display = 'block';
-            groupStatus.style.display = 'none';
-        } else if (type === 'Blacklist') {
-            groupTargetType.style.display = 'block';
-            groupAmount.style.display = 'block';
-            groupWarning.style.display = 'none';
-            groupStatus.style.display = 'block';
-        }
-        updatePreviews();
-    }
-    window.toggleNoticeFields = toggleNoticeFields;
-
-    function onTargetTypeChange() {
-        const val = targetTypeSelect.value;
-        targetNameLabel.textContent = val + ' :';
-        targetNameSearch.value = '';
-        populateTargetNames();
-        updatePreviews();
-    }
-    window.onTargetTypeChange = onTargetTypeChange;
-
-    function populateTargetNames() {
-        const currentType = targetTypeSelect.value;
-        targetNameList.innerHTML = '';
-        const filtered = rawCitizens.filter(c => c.type === currentType);
-        filtered.forEach(item => {
-            const opt = document.createElement('option');
-            opt.value = item.name;
-            targetNameList.appendChild(opt);
         });
     }
 
-    function populateRules() {
-        fineReasonList.innerHTML = '';
-        rawRules.forEach(rule => {
-            const opt = document.createElement('option');
-            const clauseNo = rule.no || '';
-            const ruleName = rule.name || '';
-            const ruleFine = rule.fine || '';
+    fetchCitizensFromFirebase();
+
+    window.switchPage = function(pageNum) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+        
+        document.getElementById(`page${pageNum}`).classList.add('active');
+        document.querySelectorAll('.nav-btn')[pageNum - 1].classList.add('active');
+
+        if(pageNum === 2) renderHistoryList();
+    }
+
+    window.onTypeChange = function() {
+        document.getElementById('targetNameInput').value = '';
+        generateText();
+        showDropdown();
+    }
+
+    window.onSearchInput = function() {
+        generateText();
+        showDropdown();
+    }
+
+    window.showDropdown = function() {
+        const selectedType = document.getElementById('targetType').value.trim();
+        const keyword = document.getElementById('targetNameInput').value.toLowerCase().trim();
+        const dropdown = document.getElementById('searchDropdown');
+        
+        const filteredNames = citizensData.filter(item => {
+            if (!item || !item.name) return false;
+            const itemType = String(item.type || '').trim();
             
-            if (rule.customDisplay) {
-                opt.value = rule.customDisplay;
+            let matchType = false;
+            if (selectedType === 'แก๊ง') {
+                matchType = (itemType === 'แก๊ง' || itemType === 'แก๊งค์');
             } else {
-                opt.value = clauseNo ? `ข้อ ${clauseNo}: ${ruleName}` : ruleName;
+                matchType = (itemType === selectedType);
             }
-            
-            if (ruleFine) {
-                opt.label = `ค่าปรับ: ${ruleFine}`;
-            }
-            fineReasonList.appendChild(opt);
-        });
-    }
 
-    function onReasonInputChange() {
-        const rawRuleInput = fineReasonSearch.value.trim();
-        const matchedRule = rawRules.find(r => {
-            const standardStr = r.no ? `ข้อ ${r.no}: ${r.name}` : r.name;
-            return standardStr === rawRuleInput || r.name === rawRuleInput || (r.customDisplay && r.customDisplay === rawRuleInput);
+            const matchKeyword = item.name.toLowerCase().includes(keyword);
+            return matchType && matchKeyword;
         });
 
-        if (matchedRule && matchedRule.fine) {
-            fineAmountInput.value = matchedRule.fine;
-            formatFineInput(fineAmountInput);
-        }
-        updatePreviews();
-    }
-    window.onReasonInputChange = onReasonInputChange;
-
-    function getCurrentTime() {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        return `${hours}:${minutes} น.`;
-    }
-
-    function getCurrentDate() {
-        const now = new Date();
-        const day = String(now.getDate()).padStart(2, '0');
-        const month = String(now.getMonth() + 1).padStart(2, '0');
-        const year = String(now.getFullYear());
-        return `${day}/${month}/${year}`;
-    }
-
-    function parseSelectedRule(inputStr) {
-        if (!inputStr) return { clause: '1', reason: '.....' };
-        
-        const match = inputStr.match(/^ข้อ\s*([^:]+):\s*(.*)$/);
-        if (match) {
-            return { clause: match[1].trim(), reason: match[2].trim() };
-        }
-        
-        const found = rawRules.find(r => r.name === inputStr || r.no === inputStr || (r.customDisplay && r.customDisplay === inputStr));
-        if (found) {
-            return { clause: found.no || '1', reason: found.name || inputStr };
-        }
-        return { clause: '1', reason: inputStr };
-    }
-
-    function updatePreviews() {
-        const noticeType = noticeTypeSelect.value;
-        const targetType = targetTypeSelect.value;
-        const name = targetNameSearch.value.trim() || '.....';
-        
-        const rawRuleInput = fineReasonSearch.value.trim();
-        const parsedRule = parseSelectedRule(rawRuleInput);
-        const reason = parsedRule.reason;
-        const blClause = parsedRule.clause;
-
-        let rawAmountText = fineAmountInput.value.trim() || '...';
-        let formattedAmount = rawAmountText;
-        
-        if (formattedAmount.includes('/')) {
-            let parts = formattedAmount.split('/');
-            let numPart = parts[0].trim();
-            let textPart = parts.slice(1).join('/').trim();
-            
-            numPart = numPart.replace(/ic/gi, '').trim();
-            textPart = textPart.replace(/ic/gi, '').trim();
-            
-            if (textPart) {
-                formattedAmount = `${numPart} IC / ${textPart}`;
-            } else {
-                formattedAmount = `${numPart} IC`;
-            }
-        } else {
-            if (!formattedAmount.toLowerCase().includes('ic')) {
-                formattedAmount += ' IC';
-            }
-        }
-
-        const warning = warningLevelSelect.value;
-        const status = paymentStatusSelect.value;
-        const timeStr = getCurrentTime();
-        const dateStr = getCurrentDate();
-
-        let targetDisplayGame = '';
-        let discordLabelKey = targetType;
-
-        if (targetType === 'แก๊ง') {
-            targetDisplayGame = `แก๊ง ${name}`;
-            discordLabelKey = 'แก๊ง';
-        } else if (targetType === 'ครอบครัว') {
-            targetDisplayGame = `ครอบครัว ${name}`;
-            discordLabelKey = 'ครอบครัว';
-        } else {
-            targetDisplayGame = `คุณ ${name}`;
-            discordLabelKey = 'คุณ';
-        }
-
-        if (noticeType === 'ตักเตือน') {
-            previewGame.textContent = `โรงพยาบาล Around Town ขอทำการประกาศตักเตือน ${targetDisplayGame} เนื่องจาก ${reason} ${warning} ขอบคุณค่ะ/ครับ`;
-            previewDiscord.textContent = `# ประกาศตักเตือน\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nข้อหา : ${reason}\nตักเตือน : ${warning}\nเวลาประกาศ : ${timeStr}\n\`\`\`\n<@&1473606329536090258>`;
-        } 
-        else if (noticeType === 'Blacklist') {
-            if (status === 'ชำระแล้ว') {
-                previewGame.textContent = `โรงพยาบาล Around Town ทำการปลด Blacklist ${targetDisplayGame} เนื่องจากจ่ายค่าปรับเรียบร้อยแล้วค่ะ/ครับ`;
-                previewDiscord.textContent = `#  ⛔  __ BLACKLIST __  ⛔\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nหัวข้อ : BLACKLIST ข้อที่ ${blClause} เนื่องจาก  ${reason}\n( เมื่อเวลา ${timeStr} วันที่ ${dateStr} )\nค่าปรับ : ${formattedAmount}\n+สถานะ : ชำระแล้ว\n\`\`\`\n<@&1473606329536090258>`;
-            } else {
-                previewGame.textContent = `โรงพยาบาล Around Town ทำการ Blacklist ${targetDisplayGame} เนื่องจาก ${reason} ขอบคุณค่ะ/ครับ`;
-                previewDiscord.textContent = `#  ⛔  __ BLACKLIST __  ⛔\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nหัวข้อ : BLACKLIST ข้อที่ ${blClause} เนื่องจาก  ${reason}\n( เมื่อเวลา ${timeStr} วันที่ ${dateStr} )\nค่าปรับ : ${formattedAmount}\n-สถานะ : ยังไม่ชำระ\n\`\`\`\n<@&1473606329536090258>`;
-            }
-        }
-    }
-
-    targetNameSearch.addEventListener('input', updatePreviews);
-    targetNameSearch.addEventListener('change', updatePreviews);
-    targetNameSearch.addEventListener('blur', updatePreviews);
-
-    fineReasonSearch.addEventListener('input', () => { onReasonInputChange(); updatePreviews(); });
-    fineReasonSearch.addEventListener('change', () => { onReasonInputChange(); updatePreviews(); });
-    fineReasonSearch.addEventListener('blur', () => { onReasonInputChange(); updatePreviews(); });
-
-    noticeTypeSelect.addEventListener('change', toggleNoticeFields);
-    targetTypeSelect.addEventListener('change', onTargetTypeChange);
-    warningLevelSelect.addEventListener('change', updatePreviews);
-    paymentStatusSelect.addEventListener('change', updatePreviews);
-
-    const citizensRef = ref(db, 'aroundTown/citizens');
-    onValue(citizensRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            rawCitizens = Object.values(data);
-        } else {
-            rawCitizens = [];
-        }
-        populateTargetNames();
-        updatePreviews();
-    });
-
-    const rulesRef = ref(db, 'aroundTown/rules');
-    onValue(rulesRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            rawRules = Object.values(data);
-        } else {
-            rawRules = [];
-        }
-        populateRules();
-    });
-
-    const historyRef = ref(db, 'hospital_notices');
-    onValue(historyRef, (snapshot) => {
-        const data = snapshot.val();
-        if (data) {
-            historyData = Object.keys(data).map(key => ({
-                id: key,
-                ...data[key]
-            })).reverse();
-        } else {
-            historyData = [];
-        }
-        updateHistoryCount();
-        if (document.getElementById('tabHistory').classList.contains('active')) {
-            renderHistory();
-        }
-    });
-
-    function saveToFirebase() {
-        const newRecordRef = ref(db, 'hospital_notices/' + Date.now());
-        const record = {
-            discordText: previewDiscord.textContent,
-            timestamp: Date.now()
-        };
-        set(newRecordRef, record).catch((error) => {
-            console.error("Error saving to Firebase: ", error);
-        });
-    }
-
-    function updateHistoryCount() {
-        document.getElementById('historyCount').textContent = historyData.length;
-    }
-
-    function renderHistory() {
-        const historyList = document.getElementById('historyList');
-        if (historyData.length === 0) {
-            historyList.innerHTML = `<div class="empty-history">ยังไม่มีประวัติการประกาศ</div>`;
+        if (filteredNames.length === 0) {
+            dropdown.innerHTML = '<div class="search-dropdown-item" style="color: #f472b6b3; cursor: default;">ไม่พบข้อมูลในระบบ (สามารถพิมพ์ชื่อเองได้เลย)</div>';
+            dropdown.style.display = 'block';
             return;
         }
 
-        historyList.innerHTML = historyData.map((item, index) => `
-            <div class="history-item">
-                <div class="history-content">${item.discordText}</div>
-                <div class="history-footer">
-                    <span style="font-size: 11px; color: #71717a;">รายการที่ #${historyData.length - index}</span>
-                    <button class="btn-action" style="width: auto; padding: 6px 12px; font-size: 11px; margin-top:0;" onclick="copyHistoryItem('${item.id}')">📋 คัดลอกข้อความนี้</button>
-                </div>
-            </div>
-        `).join('');
-    }
-    window.renderHistory = renderHistory;
+        dropdown.innerHTML = '';
+        filteredNames.forEach(item => {
+            let div = document.createElement('div');
+            div.className = 'search-dropdown-item';
+            div.innerText = item.name;
+            div.onmousedown = () => {
+                document.getElementById('targetNameInput').value = item.name;
+                generateText();
+                hideDropdown();
+            };
+            dropdown.appendChild(div);
+        });
 
-    window.copyHistoryItem = function(id) {
-        const item = historyData.find(el => el.id === id);
-        if (item) {
-            navigator.clipboard.writeText(item.discordText).then(() => {
-                showToast("คัดลอกข้อความประวัติสำเร็จ!");
-                switchTab('create');
-            });
-        }
-    };
-
-    function clearHistory() {
-        if (confirm('คุณต้องการล้างประวัติทั้งหมดจากฐานข้อมูลใช่หรือไม่?')) {
-            set(historyRef, null).then(() => {
-                showToast("ล้างประวัติสำเร็จ!");
-            });
-        }
-    }
-    window.clearHistory = clearHistory;
-
-    function showToast(message) {
-        const toast = document.getElementById("toast");
-        toast.textContent = message;
-        toast.className = "show";
-        setTimeout(() => { toast.className = ""; }, 1800);
+        dropdown.style.display = 'block';
     }
 
-    function triggerButtonAnimation(button, originalText) {
-        button.classList.add('success');
-        button.innerHTML = '✅ คัดลอกสำเร็จ!';
+    function hideDropdown() {
         setTimeout(() => {
-            button.classList.remove('success');
-            button.innerHTML = originalText;
-        }, 1200);
+            const dropdown = document.getElementById('searchDropdown');
+            if (dropdown) dropdown.style.display = 'none';
+        }, 200);
     }
 
-    function copyGameText() {
-        navigator.clipboard.writeText(previewGame.textContent).then(() => {
-            showToast("คัดลอกข้อความในเกมสำเร็จ!");
-            triggerButtonAnimation(btnGame, '📋 คัดลอกข้อความในเกม');
+    window.addEventListener('click', function(e) {
+        const inputElem = document.getElementById('targetNameInput');
+        const dropdownElem = document.getElementById('searchDropdown');
+        if (inputElem && dropdownElem && !inputElem.contains(e.target) && !dropdownElem.contains(e.target)) {
+            hideDropdown();
+        }
+    });
+
+    function renderTimeButtons() {
+        const container = document.getElementById('timeButtonsContainer');
+        if (!container) return;
+        container.innerHTML = '';
+        
+        availableTimes.forEach((time) => {
+            let btn = document.createElement('button');
+            btn.className = `time-btn ${time === selectedDuration ? 'active' : ''}`;
+            btn.innerText = `${time} นาที`;
+            btn.onclick = () => {
+                selectedDuration = time;
+                renderTimeButtons();
+                generateText();
+            };
+            container.appendChild(btn);
         });
     }
-    window.copyGameText = copyGameText;
 
-    function copyDiscordText() {
-        saveToFirebase();
-        navigator.clipboard.writeText(previewDiscord.textContent).then(() => {
-            showToast("คัดลอกข้อความ Discord และบันทึกแล้ว!");
-            triggerButtonAnimation(btnDiscord, '📋 คัดลอกข้อความ Discord');
+    window.generateText = function() {
+        const typeElem = document.getElementById('targetType');
+        const nameElem = document.getElementById('targetNameInput');
+        
+        if (!typeElem || !nameElem) return;
+
+        const type = typeElem.value;
+        const nameInputVal = nameElem.value.trim();
+        
+        const now = new Date();
+        const startTimeStr = formatTime(now);
+        
+        const duration = Number(selectedDuration) || 0;
+        const endTime = new Date(now.getTime() + duration * 60000);
+        const endTimeStr = formatTime(endTime);
+        
+        let displayTarget = nameInputVal !== '' ? `${nameInputVal}` : '.....';
+        let prefix = "";
+
+        if (type === 'แก๊ง') {
+            prefix = `แก๊ง : ${displayTarget}`;
+        } else if (type === 'ครอบครัว') {
+            prefix = `family : ${displayTarget}`;
+        } else if (type === 'ประชาชน') {
+            prefix = `ประชาชน : ${displayTarget}`;
+        } else {
+            prefix = `${type} : ${displayTarget}`;
+        }
+
+        // สมมติว่า startTimeStr และ endTimeStr อาจจะติดช่องว่างมา ให้ใช้ .replace(/\s*:\s*/g, ':') เพื่อความชัวร์
+const cleanStart = startTimeStr.replace(/\s*:\s*/g, ':');
+const cleanEnd = endTimeStr.replace(/\s*:\s*/g, ':');
+
+const gameText = `ประกาศออกจากพื้นที่โรงพยาบาล ${prefix} ออกจากพื้นที่โรงพยาบาลภายใน ระยะเวลา ${duration} นาที เริ่มตั้งแต่เวลา ${cleanStart} ถึง ${cleanEnd} ขอบคุณครับ/ค่ะ`;
+
+const discordText = `# ประกาศออกจากพื้นที่โรงพยาบาล \n\`\`\`\nประกาศออกจากพื้นที่โรงพยาบาล  ${prefix} ออกจากพื้นที่โรงพยาบาลภายใน ระยะเวลา ${duration} นาที เริ่มตั้งแต่เวลา ${cleanStart} ถึง ${cleanEnd} ขอบคุณครับ/ค่ะ\n\`\`\`\n<@&1473606329536090258>`;
+        const gamePreview = document.getElementById('gamePreview');
+        const discordPreview = document.getElementById('discordPreview');
+
+        if (gamePreview) gamePreview.innerText = gameText;
+        if (discordPreview) discordPreview.innerText = discordText;
+    }
+
+    function formatTime(date) {
+        const hours = String(date.getHours()).padStart(2, '0');
+        const minutes = String(date.getMinutes()).padStart(2, '0');
+        return `${hours} : ${minutes} น.`;
+    }
+
+    window.copyAndLog = function(type, btn) {
+        const textToCopy = type === 'game' 
+            ? document.getElementById('gamePreview').innerText 
+            : document.getElementById('discordPreview').innerText;
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const originalText = btn.innerText;
+            btn.classList.add('btn-success-flash');
+            btn.innerText = '✓ คัดลอกสำเร็จ!';
+            
+            setTimeout(() => {
+                btn.classList.remove('btn-success-flash');
+                btn.innerText = originalText;
+            }, 1000);
+            
+            const historyItem = {
+                text: textToCopy,
+                time: new Date().toLocaleString('th-TH')
+            };
+            historyList.unshift(historyItem);
+            localStorage.setItem('hospital_cooldown_history', JSON.stringify(historyList));
         });
     }
-    window.copyDiscordText = copyDiscordText;
 
-    toggleNoticeFields();
+    function renderHistoryList() {
+        const container = document.getElementById('historyContainer');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if(historyList.length === 0) {
+            container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 30px; font-size: 16px;">ยังไม่มีประวัติการประกาศจ้า</div>';
+            return;
+        }
+
+        historyList.forEach((item, index) => {
+            let div = document.createElement('div');
+            div.className = 'history-item';
+            div.innerHTML = `
+                <div style="flex: 1;">
+                    <div class="history-time">🕒 ${item.time}</div>
+                    <div style="word-break: break-all; white-space: pre-wrap; color: #f1f5f9;">${item.text}</div>
+                </div>
+                <button class="btn-delete" onclick="deleteHistoryItem(${index})">ลบ</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    window.deleteHistoryItem = function(index) {
+        historyList.splice(index, 1);
+        localStorage.setItem('hospital_cooldown_history', JSON.stringify(historyList));
+        renderHistoryList();
+    }
+
+    window.clearHistory = function() {
+        historyList = [];
+        localStorage.removeItem('hospital_cooldown_history');
+        renderHistoryList();
+    }
+
+    function initApp() {
+        renderTimeButtons();
+        generateText();
+    }
+
+    initApp();
 </script>
-
 </body>
 </html>
