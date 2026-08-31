@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคัดลอกข้อความประกาศเคส</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #121214;
+            font-family: 'Prompt', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #dcddde;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+            max-width: 820px;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        /* หัวข้อใหญ่ด้านบน ขยายให้สมส่วนกับจอคอม */
+        .page-header {
+            background-color: #18181b;
+            border: 1px solid #27272a;
+            padding: 18px 24px;
+            border-radius: 14px;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #f43f5e;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .form-card {
+            background-color: #18181b;
+            border: 1px solid #27272a;
+            padding: 32px;
+            border-radius: 14px;
+            box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            color: #f4f4f5;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            background-color: #09090b;
+            border: 1px solid #27272a;
+            border-radius: 10px;
+            color: #ffffff;
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #f43f5e;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #f4f4f5;
+            margin: 8px 0 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .preview-box {
+            background-color: #09090b;
+            border: 1px solid #27272a;
+            padding: 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #a1a1aa;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.5;
+            min-height: 52px;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            font-family: 'Prompt', sans-serif;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s, transform 0.1s;
+            color: #ffffff;
+            background: linear-gradient(135deg, #f43f5e, #e11d48);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 12px rgba(244, 63, 94, 0.3);
+        }
+
+        .btn-action:hover {
+            background: linear-gradient(135deg, #e11d48, #be123c);
+        }
+
+        .btn-action:active {
+            transform: scale(0.98);
+        }
+
+        .btn-action.success {
+            background: linear-gradient(135deg, #10b981, #059669) !important;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 200px;
+            background-color: #f43f5e;
+            color: #fff;
+            text-align: center;
+            border-radius: 10px;
+            padding: 12px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.3s 2.2s;
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- หัวข้อใหญ่ด้านบน -->
+        <div class="page-header">
+            <span>🚨</span>
+            <span>ประกาศไม่พบศพ</span>
+        </div>
+
+        <div class="form-card">
+            <div class="form-row">
+                <div class="form-group" style="flex: 1.2;">
+                    <label for="charName">ชื่อผู้สลบ :</label>
+                    <input type="text" id="charName" placeholder="พิมพ์ชื่อ...">
+                </div>
+                <div class="form-group" style="flex: 0.8;">
+                    <label for="charPhone">เบอร์โทร :</label>
+                    <input type="text" id="charPhone" placeholder="เบอร์...">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="caseType">เลือกประเภทเคส</label>
+                <select id="caseType">
+                    <option value="notFound">ไม่พบศพ</option>
+                    <option value="lostMap">เคสตกแมพ</option>
+                </select>
+            </div>
+
+            <div>
+                <div class="section-title">📝 ข้อความสำหรับในเกม </div>
+                <div id="previewGame" class="preview-box"></div>
+                <div style="margin-top: 10px;">
+                    <button id="btnGame" class="btn-action" onclick="copyGameText()">📋 คัดลอกข้อความในเกม</button>
+                </div>
+            </div>
+
+            <div>
+                <div class="section-title">💬 ข้อความสำหรับ Discord</div>
+                <div id="previewDiscord" class="preview-box"></div>
+                <div style="margin-top: 10px;">
+                    <button id="btnDiscord" class="btn-action" onclick="copyDiscordText()">📋 คัดลอกข้อความ Discord</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast">คัดลอกข้อความสำเร็จ!</div>
+
+    <script>
+        const nameInput = document.getElementById('charName');
+        const phoneInput = document.getElementById('charPhone');
+        const caseTypeSelect = document.getElementById('caseType');
+        
+        const previewGame = document.getElementById('previewGame');
+        const previewDiscord = document.getElementById('previewDiscord');
+
+        const btnGame = document.getElementById('btnGame');
+        const btnDiscord = document.getElementById('btnDiscord');
+
+        function getName() {
+            return nameInput.value.trim() || '.....';
+        }
+
+        function getPhone() {
+            return phoneInput.value.trim() || '.....';
+        }
+
+        function updatePreviews() {
+            const caseType = caseTypeSelect.value;
+            const name = getName();
+            const phone = getPhone();
+
+            if (caseType === 'notFound') {
+                previewGame.textContent = `แพทย์ไม่พบผู้สลบ ชื่อ : ${name}  เบอร์ : ${phone}  กรุณาลงห้องติดต่อแพทย์/หรือแจ้งเคสตกหล่น ในนิตยสารประเทศค่ะ/ครับ`;
+                previewDiscord.textContent = "```\nแพทย์ไม่พบผู้สลบชื่อ " + name + " เบอร์ " + phone + " กรุณาลงห้องติดต่อแพทย์/หรือแจ้งเคสตกหล่น ในนิตยสารประเทศค่ะ/ครับ\n```\n<@&1473606329536090258>";
+            } else {
+                previewGame.textContent = `ผู้สลบชื่อ : ${name}   เบอร์ : ${phone}  เนื่องจากผู้สลบอยู่นอกเหนือการช่วยเหลือของแพทย์ กรุณาแจ้ง Report แอดมิน หรือ ห้องตกแมพ-บัค-ลงเมืองไม่ได้ ในนิตยสารประเทศค่ะ/ครับ`;
+                previewDiscord.textContent = "```\nผู้สลบชื่อ " + name + " เบอร์ " + phone + " เนื่องจากผู้สลบอยู่นอกเหนือการช่วยเหลือของแพทย์ กรุณาแจ้ง Report แอดมิน หรือ ห้องตกแมพ-บัค-ลงเมืองไม่ได้ ในนิตยสารประเทศค่ะ/ครับ\n```\n<@&1473606329536090258>";
+            }
+        }
+
+        nameInput.addEventListener('input', updatePreviews);
+        phoneInput.addEventListener('input', updatePreviews);
+        caseTypeSelect.addEventListener('change', updatePreviews);
+
+        updatePreviews();
+
+        function showToast(message) {
+            const toast = document.getElementById("toast");
+            toast.textContent = message;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2200);
+        }
+
+        function triggerButtonAnimation(button, originalText) {
+            button.classList.add('success');
+            button.innerHTML = '✅ คัดลอกสำเร็จ!';
+            setTimeout(() => {
+                button.classList.remove('success');
+                button.innerHTML = originalText;
+            }, 1500);
+        }
+
+        function copyGameText() {
+            navigator.clipboard.writeText(previewGame.textContent).then(() => {
+                showToast("คัดลอกข้อความในเกมสำเร็จ!");
+                triggerButtonAnimation(btnGame, '📋 คัดลอกข้อความในเกม');
+            });
+        }
+
+        function copyDiscordText() {
+            navigator.clipboard.writeText(previewDiscord.textContent).then(() => {
+                showToast("คัดลอกข้อความ Discord สำเร็จ!");
+                triggerButtonAnimation(btnDiscord, '📋 คัดลอกข้อความ Discord');
+            });
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Around Town </title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-dark: #0b0f19; 
+            --card-bg: #131b2e; 
+            --card-hover: #17223b; 
+            --text-main: #f3f4f6; 
+            --text-muted: #9ca3af; 
+            --border-color: #1f293d; 
+            --success-green: #00e676; 
+        }
+        body { font-family: 'Kanit', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 30px 20px; }
+        .main-wrapper { max-width: 1350px; margin: 0 auto; }
+        
+        .section-card { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 24px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box; 
+        }
+        
+        .directory-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            flex-wrap: wrap; 
+            gap: 20px; 
+        }
+        
+        .directory-tag { 
+            background: rgba(255, 71, 117, 0.12); 
+            color: #ff4775; 
+            padding: 5px 14px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            display: inline-block; 
+            margin-bottom: 8px; 
+            border: 1px solid rgba(255, 71, 117, 0.25);
+            font-weight: 500;
+        }
+        
+        .section-title { 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            margin: 0 0 5px 0; 
+        }
+        
+        .section-subtitle { 
+            font-size: 0.9rem; 
+            color: var(--text-muted); 
+            margin: 0; 
+        }
+        
+        .search-box { 
+            position: relative; 
+            width: 320px; 
+        }
+        
+        .search-box input { 
+            width: 100%; 
+            padding: 12px 18px 12px 42px; 
+            background: var(--bg-dark); 
+            border: 1px solid var(--border-color); 
+            border-radius: 30px; 
+            color: var(--text-main); 
+            font-family: 'Kanit', sans-serif; 
+            font-size: 0.95rem;
+            outline: none; 
+            transition: border-color 0.2s, box-shadow 0.2s; 
+            box-sizing: border-box;
+        }
+        
+        .search-box input:focus { 
+            border-color: #ff4775; 
+            box-shadow: 0 0 10px rgba(255, 71, 117, 0.2);
+        }
+        
+        .search-box::before { 
+            content: '🔍'; 
+            position: absolute; 
+            left: 16px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            font-size: 0.9rem; 
+        }
+        
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; 
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: left; 
+        }
+        
+        th { 
+            background-color: transparent; 
+            color: var(--text-muted); 
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 16px 20px; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+        
+        td { 
+            padding: 18px 20px; 
+            border-bottom: 1px solid var(--border-color); 
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        
+        tr:hover td { 
+            background-color: var(--card-hover); 
+        }
+        
+        .status-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            background: rgba(0, 230, 118, 0.08);
+            color: var(--success-green);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            white-space: nowrap;
+        }
+        
+        .status-dot { 
+            width: 7px; 
+            height: 7px; 
+            background-color: var(--success-green); 
+            border-radius: 50%; 
+            box-shadow: 0 0 8px var(--success-green);
+        }
+        
+        .position-pill { 
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 16px; 
+            border-radius: 20px; 
+            font-size: 0.85rem; 
+            font-weight: 500; 
+            border: 1px solid transparent;
+            white-space: nowrap;
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .pos-director {
+            background: rgba(186, 104, 200, 0.15);
+            color: #ce93d8;
+            border-color: rgba(186, 104, 200, 0.35);
+        }
+
+        .pos-subdirector {
+            background: rgba(41, 121, 255, 0.15);
+            color: #82b1ff;
+            border-color: rgba(41, 121, 255, 0.35);
+        }
+
+        .pos-head {
+            background: rgba(255, 179, 0, 0.15);
+            color: #ffd54f;
+            border-color: rgba(255, 179, 0, 0.35);
+        }
+
+        .pos-expert {
+            background: rgba(0, 191, 165, 0.15);
+            color: #64ffda;
+            border-color: rgba(0, 191, 165, 0.35);
+        }
+
+        .pos-doctor, .pos-student {
+            background: rgba(92, 107, 192, 0.15);
+            color: #9fa8da;
+            border-color: rgba(92, 107, 192, 0.35);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="section-card">
+            <div class="directory-header">
+                <div>
+                    <span class="directory-tag">ทำเนียบแพทย์ปัจจุบัน</span>
+                    <div class="section-title">รายชื่อแพทย์และบุคลากรทั้งหมด</div>
+                    <div class="section-subtitle">ตรวจสอบสถานะ ตำแหน่ง </div>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="dirSearchInput" placeholder="ค้นหาชื่อแพทย์ หรือตำแหน่ง..." oninput="renderDirectory()">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 25%;">รายชื่อแพทย์</th>
+                            <th style="width: 15%;">วันที่เข้า</th>
+                            <th style="width: 15%;">วันที่ออก</th>
+                            <th style="width: 15%;">เบอร์โทรในเมือง</th>
+                            <th style="width: 15%;">สถานะ</th>
+                            <th style="width: 15%;">ตำแหน่ง</th>
+                        </tr>
+                    </thead>
+                    <tbody id="directoryTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
+            authDomain: "around-town-armd-684f7.firebaseapp.com",
+            databaseURL: "https://around-town-armd-684f7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "around-town-armd-684f7",
+            storageBucket: "around-town-armd-684f7.firebasestorage.app",
+            messagingSenderId: "176321996941",
+            appId: "1:176321996941:web:f697ff48100754a4bb9ac4",
+            measurementId: "G-YV720SHKR0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const rankConfig = { 
+            "ผอ. หมอ": { order: 1, class: "pos-director" }, 
+            "รองผอ. หมอ": { order: 2, class: "pos-subdirector" }, 
+            "หัวหน้าแพทย์": { order: 3, class: "pos-head" }, 
+            "แพทย์ชำนาญการ": { order: 4, class: "pos-expert" }, 
+            "แพทย์": { order: 5, class: "pos-doctor" }, 
+            "นักเรียนแพทย์": { order: 6, class: "pos-student" } 
+        };
+
+        let doctorsData = [];
+
+        function isThai(char) {
+            const code = char.charCodeAt(0);
+            return code >= 3585 && code <= 3675;
+        }
+
+        function customNameSort(nameA, nameB) {
+            let a = (nameA || "").trim();
+            let b = (nameB || "").trim();
+            let charA = a.charAt(0);
+            let charB = b.charAt(0);
+
+            let isThaiA = isThai(charA);
+            let isThaiB = isThai(charB);
+
+            if (isThaiA && !isThaiB) return -1;
+            if (!isThaiA && isThaiB) return 1;
+
+            return a.localeCompare(b, 'th', { numeric: true, sensitivity: 'base' });
+        }
+
+        function sortDoctorsArray(arr) {
+            return arr.sort((a, b) => {
+                let rankA = rankConfig[a.position] ? rankConfig[a.position].order : 99;
+                let rankB = rankConfig[b.position] ? rankConfig[b.position].order : 99;
+                
+                if (rankA !== rankB) return rankA - rankB; 
+                return customNameSort(a.name, b.name);
+            });
+        }
+
+        window.renderDirectory = function() {
+            const tbody = document.getElementById('directoryTableBody');
+            const searchInput = document.getElementById('dirSearchInput');
+            if (!tbody || !searchInput) return;
+
+            const searchVal = searchInput.value.toLowerCase();
+            tbody.innerHTML = "";
+
+            let sorted = [...doctorsData];
+            sortDoctorsArray(sorted);
+
+            let filtered = sorted.filter(doc => 
+                (doc.name || "").toLowerCase().includes(searchVal) || 
+                (doc.position || "").toLowerCase().includes(searchVal)
+            );
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--text-muted); padding: 30px;">ไม่พบข้อมูลแพทย์หรือบุคลากรที่ค้นหา</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(doc => {
+                let posInfo = rankConfig[doc.position] || { class: "pos-doctor" };
+                tbody.innerHTML += `<tr>
+                    <td><b>${doc.name || '-'}</b></td>
+                    <td>${doc.inDate || '-'}</td>
+                    <td>${doc.outDate || '-'}</td>
+                    <td>${doc.phone || '-'}</td>
+                    <td><div class="status-badge"><span class="status-dot"></span>${doc.status || 'ยังอยู่ในหน่วยงาน'}</div></td>
+                    <td><span class="position-pill ${posInfo.class}">${doc.position || 'แพทย์'}</span></td>
+                </tr>`;
+            });
+        }
+
+        // --- โหลดข้อมูลแบบ Real-time จาก Firebase ---
+        onValue(ref(db, 'aroundTown'), (snapshot) => {
+            const data = snapshot.val() || {};
+            doctorsData = data.doctors || [];
+            renderDirectory();
+        }, (error) => {
+            console.error("Firebase connection error: ", error);
+        });
+    </script>
+</body>
+</html>

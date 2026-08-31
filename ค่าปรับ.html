@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประกาศค่าปรับโรงพยาบาล</title>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #09090b;
+            --card-bg: #18181b;
+            --border-color: #27272a;
+            --text-main: #f4f4f5;
+            --text-muted: #a1a1aa;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Prompt', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 10px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .nav-tab {
+            padding: 8px 16px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 13px;
+            transition: 0.2s;
+        }
+
+        .nav-tab.active {
+            background-color: var(--primary);
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .workspace-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        .panel-box {
+            background-color: rgba(24, 24, 27, 0.5);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group {
+            margin-bottom: 10px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-size: 13px;
+            color: var(--text-main);
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 8px 12px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            color: var(--text-main);
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary);
+        }
+
+        .preview-box {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 12px;
+            color: #d4d4d8;
+            white-space: pre-wrap;
+            word-break: break-all;
+            margin-top: 4px;
+            font-family: monospace;
+        }
+
+        #previewGame {
+            max-height: 85px;
+            overflow-y: auto;
+        }
+
+        #previewDiscord {
+            min-height: 175px;
+            overflow-y: visible;
+        }
+
+        .btn-action {
+            width: 100%;
+            padding: 8px;
+            background-color: var(--primary);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            cursor: pointer;
+            margin-top: 6px;
+            transition: background-color 0.2s;
+        }
+
+        .btn-action:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-action.success {
+            background-color: var(--success);
+        }
+
+        .history-item {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+        }
+
+        .history-content {
+            font-size: 12px;
+            white-space: pre-wrap;
+            color: #d4d4d8;
+            margin-bottom: 6px;
+            font-family: monospace;
+        }
+
+        .history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 20px;
+            font-size: 13px;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 220px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 10px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 20px;
+            transform: translateX(-50%);
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.3);
+            font-size: 13px;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.3s 1.5s;
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 20px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 20px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast">คัดลอกข้อความสำเร็จ!</div>
+
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+            <h2 style="font-size: 16px; font-weight: 600;">🏥 ระบบประกาศค่าปรับโรงพยาบาล</h2>
+            <div class="nav-tabs" style="margin-bottom: 0;">
+                <button class="nav-tab active" onclick="switchTab('create')"> สร้างประกาศ</button>
+                <button class="nav-tab" onclick="switchTab('history')"> ประวัติ (<span id="historyCount">0</span>)</button>
+            </div>
+        </div>
+
+        <div id="tabCreate" class="tab-content active">
+            <div class="workspace-grid">
+                <div class="panel-box">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="form-group">
+                            <label>ประเภทผู้ถูกปรับ :</label>
+                            <select id="targetType" class="form-control" onchange="onTargetTypeChange()">
+                                <option value="ประชาชน">ประชาชน</option>
+                                <option value="หมอ">หมอ</option>
+                                <option value="แก๊ง">แก๊ง</option>
+                                <option value="ครอบครัว">ครอบครัว</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>สถานะการชำระ :</label>
+                            <select id="paymentStatus" class="form-control" onchange="updatePreviews()">
+                                <option value="ยังไม่ชำระ">ยังไม่ชำระ</option>
+                                <option value="ชำระแล้ว">ชำระแล้ว</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label id="targetNameLabel">ชื่อประชาชน :</label>
+                        <input type="text" id="targetNameInput" class="form-control" list="targetList" placeholder="พิมพ์ค้นหาหรือพิมพ์ชื่อเอง..." oninput="updatePreviews()">
+                        <datalist id="targetList"></datalist>
+                    </div>
+
+                    <div class="form-group">
+                        <label>เลือกข้อหา :</label>
+                        <input type="text" id="ruleSearchInput" class="form-control" list="ruleList" placeholder="พิมพ์ค้นหาข้อหาจากระบบ..." oninput="onRuleSearchInput()">
+                        <datalist id="ruleList"></datalist>
+                    </div>
+
+                    <div class="form-group">
+                        <label>ข้อหา / หัวข้อ :</label>
+                        <input type="text" id="fineReason" class="form-control" placeholder="ระบุข้อหา..." oninput="updatePreviews()">
+                    </div>
+
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="form-group">
+                            <label>จำนวนเงินค่าปรับ (IC) :</label>
+                            <input type="text" id="fineAmount" class="form-control" placeholder="ระบุจำนวนเงิน หรือ 10/ตักเตือน..." oninput="updatePreviews()">
+                        </div>
+                        <div class="form-group">
+                            <label>หมอผู้รับผิดชอบ :</label>
+                            <input type="text" id="officerNameInput" class="form-control" list="doctorList" placeholder="พิมพ์ค้นหาหรือพิมพ์ชื่อเอง..." oninput="updatePreviews()">
+                            <datalist id="doctorList"></datalist>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="panel-box" style="justify-content: space-between;">
+                    <div>
+                        <div class="form-group">
+                            <label>💡 ข้อความในเกม </label>
+                            <div id="previewGame" class="preview-box">...</div>
+                            <button id="btnGame" class="btn-action" onclick="copyGameText()">📋 คัดลอกข้อความในเกม</button>
+                        </div>
+
+                        <div class="form-group" style="margin-top: 8px;">
+                            <label>💡 ข้อความ Discord </label>
+                            <div id="previewDiscord" class="preview-box">...</div>
+                            <button id="btnDiscord" class="btn-action" onclick="copyDiscordText()">📋 คัดลอกข้อความ Discord</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="tabHistory" class="tab-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="font-size: 14px; font-weight: 600;">ประวัติย้อนหลัง</h3>
+                <button onclick="clearHistory()" style="background: transparent; border: none; color: #f43f5e; cursor: pointer; font-family: 'Prompt'; font-size: 12px;">🗑️ ล้างประวัติทั้งหมด</button>
+            </div>
+            <div id="historyList" style="max-height: 400px; overflow-y: auto;">
+                <div class="empty-history">ยังไม่มีประวัติการประกาศค่าปรับ</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
+            authDomain: "around-town-armd-684f7.firebaseapp.com",
+            databaseURL: "https://around-town-armd-684f7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "around-town-armd-684f7",
+            storageBucket: "around-town-armd-684f7.firebasestorage.app",
+            messagingSenderId: "176321996941",
+            appId: "1:176321996941:web:f697ff48100754a4bb9ac4",
+            measurementId: "G-YV720SHKR0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const targetTypeSelect = document.getElementById('targetType');
+        const targetNameLabel = document.getElementById('targetNameLabel');
+        const targetNameInput = document.getElementById('targetNameInput');
+        const targetList = document.getElementById('targetList');
+        
+        const officerNameInput = document.getElementById('officerNameInput');
+        const doctorList = document.getElementById('doctorList');
+
+        const ruleSearchInput = document.getElementById('ruleSearchInput');
+        const ruleList = document.getElementById('ruleList');
+        const fineReasonInput = document.getElementById('fineReason');
+        const fineAmountInput = document.getElementById('fineAmount');
+        const paymentStatusSelect = document.getElementById('paymentStatus');
+
+        const previewGame = document.getElementById('previewGame');
+        const previewDiscord = document.getElementById('previewDiscord');
+        const btnGame = document.getElementById('btnGame');
+        const btnDiscord = document.getElementById('btnDiscord');
+
+        let appData = { gangs: [], families: [], citizens: [], doctors: [], rules: [] };
+        let historyData = JSON.parse(localStorage.getItem('hospital_fine_history')) || [];
+
+        onValue(ref(db, 'aroundTown'), (snapshot) => {
+            const data = snapshot.val() || {};
+            appData.citizens = parseFirebaseData(data.citizens);
+            appData.doctors = parseFirebaseData(data.doctors);
+            appData.rules = parseFirebaseData(data.rules);
+            appData.gangs = parseFirebaseData(data.gangs);
+            appData.families = parseFirebaseData(data.families);
+
+            renderTargetOptions();
+            renderDoctorOptions();
+            renderRuleOptions();
+            updatePreviews();
+        });
+
+        function parseFirebaseData(items) {
+            let normalized = [];
+            if (!items) return normalized;
+            const rawArray = Array.isArray(items) ? items : Object.values(items);
+            normalized = rawArray.map(item => {
+                if (!item) return null;
+                if (typeof item === 'string') return { name: item, type: 'ประชาชน' };
+                return { 
+                    name: item.name || item.title || item.username || item.citizenName || '',
+                    type: item.type || 'ประชาชน',
+                    position: item.position || '',
+                    fine: item.fine || '',
+                    no: item.no || ''
+                };
+            });
+            return normalized.filter(i => i && (i.name || i.fine));
+        }
+
+        window.renderTargetOptions = function() {
+            const type = targetTypeSelect.value;
+            targetList.innerHTML = '';
+
+            let filteredItems = [];
+            if (type === 'หมอ') {
+                filteredItems = appData.doctors;
+            } else if (type === 'แก๊ง') {
+                filteredItems = appData.citizens.filter(item => item.type === 'แก๊ง').concat(appData.gangs);
+            } else if (type === 'ครอบครัว') {
+                filteredItems = appData.citizens.filter(item => item.type === 'ครอบครัว').concat(appData.families);
+            } else {
+                filteredItems = appData.citizens.filter(item => item.type === 'ประชาชน' || (!item.type && type === 'ประชาชน'));
+            }
+
+            let uniqueMap = new Map();
+            filteredItems.forEach(item => {
+                if (item && item.name) uniqueMap.set(item.name, item);
+            });
+            let uniqueItems = Array.from(uniqueMap.values());
+
+            uniqueItems.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+            uniqueItems.forEach(item => {
+                const opt = document.createElement('option');
+                // ถ้าเลือกประเภทเป็น "หมอ" ให้ value เป็นแค่ชื่อหมอเพียวๆ ไม่แสดงยศในวงเล็บ
+                if (type === 'หมอ') {
+                    opt.value = item.name;
+                } else {
+                    opt.value = item.position ? `${item.name} (${item.position})` : item.name;
+                }
+                opt.textContent = item.position ? `${item.name} (${item.position})` : item.name;
+                targetList.appendChild(opt);
+            });
+        }
+
+        window.renderDoctorOptions = function() {
+            doctorList.innerHTML = '';
+            let normalizedDoctors = [...appData.doctors];
+            normalizedDoctors.sort((a, b) => a.name.localeCompare(b.name, 'th'));
+
+            normalizedDoctors.forEach(doc => {
+                const opt = document.createElement('option');
+                opt.value = doc.name; 
+                opt.textContent = doc.position ? `${doc.name} (${doc.position})` : doc.name;
+                doctorList.appendChild(opt);
+            });
+        }
+
+        window.renderRuleOptions = function() {
+            ruleList.innerHTML = '';
+            appData.rules.forEach((rule) => {
+                const opt = document.createElement('option');
+                opt.value = `${rule.no ? `[${rule.no}] ` : ''}${rule.name} ${rule.fine ? `- (${rule.fine})` : ''}`;
+                ruleList.appendChild(opt);
+            });
+        }
+
+        window.onRuleSearchInput = function() {
+            const val = ruleSearchInput.value;
+            const matchedRule = appData.rules.find(rule => {
+                const fullStr = `${rule.no ? `[${rule.no}] ` : ''}${rule.name} ${rule.fine ? `- (${rule.fine})` : ''}`;
+                return fullStr === val || rule.name === val;
+            });
+
+            if (matchedRule) {
+                fineReasonInput.value = matchedRule.name || '';
+                if (matchedRule.fine !== undefined && matchedRule.fine !== null) {
+                    let fineStr = String(matchedRule.fine).trim();
+                    fineAmountInput.value = formatAmountWithIC(fineStr);
+                } else {
+                    fineAmountInput.value = '';
+                }
+            }
+            updatePreviews();
+        }
+
+        function formatAmountWithIC(val) {
+            if (!val) return '';
+            let cleanVal = val.replace(/IC/gi, '').trim();
+            if (cleanVal.includes('/')) {
+                let parts = cleanVal.split('/');
+                let numPart = parts[0].replace(/\D/g, '');
+                if (numPart) {
+                    numPart = Number(numPart).toLocaleString('en-US');
+                }
+                return `${numPart} IC / ${parts[1].trim()}`;
+            } else if (cleanVal.includes('ตักเตือน')) {
+                let numPart = cleanVal.replace(/\D/g, '');
+                if (numPart) {
+                    return `${Number(numPart).toLocaleString('en-US')} IC / ตักเตือน`;
+                }
+                return `ตักเตือน`;
+            } else {
+                let numPart = cleanVal.replace(/\D/g, '');
+                if (numPart) {
+                    return `${Number(numPart).toLocaleString('en-US')} IC`;
+                }
+                return cleanVal;
+            }
+        }
+
+        window.onTargetTypeChange = function() {
+            const val = targetTypeSelect.value;
+            if (val === 'แก๊ง') {
+                targetNameLabel.textContent = 'ชื่อแก๊ง :';
+            } else if (val === 'ครอบครัว') {
+                targetNameLabel.textContent = 'ชื่อ Family :';
+            } else if (val === 'หมอ') {
+                targetNameLabel.textContent = 'ชื่อหมอ :';
+            } else {
+                targetNameLabel.textContent = 'ชื่อประชาชน :';
+            }
+            targetNameInput.value = '';
+            renderTargetOptions();
+            updatePreviews();
+        }
+
+        window.switchTab = function(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+            if (tabName === 'create') {
+                document.getElementById('tabCreate').classList.add('active');
+                document.querySelectorAll('.nav-tab')[0].classList.add('active');
+            } else {
+                document.getElementById('tabHistory').classList.add('active');
+                document.querySelectorAll('.nav-tab')[1].classList.add('active');
+                renderHistory();
+            }
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            return `${hours}:${minutes} น.`;
+        }
+
+        window.updatePreviews = function() {
+            const type = targetTypeSelect.value;
+            let rawName = targetNameInput.value.trim();
+            
+            // ถ้าเลือกประเภทเป็น "หมอ" ให้ตัดยศ (ถ้ามีติดมา) ออกให้เหลือแค่ชื่อเพียวๆ ในข้อความแสดงผล
+            let name = rawName ? (type === 'หมอ' ? rawName.split(' (')[0].trim() : rawName) : '.....';
+
+            const reason = fineReasonInput.value.trim() || '.....';
+            let rawAmount = fineAmountInput.value.trim();
+            let amount = rawAmount ? formatAmountWithIC(rawAmount) : '...';
+            
+            let rawOfficer = officerNameInput.value.trim();
+            let officer = rawOfficer ? rawOfficer.split(' (')[0].trim() : '.....';
+
+            const status = paymentStatusSelect.value;
+            const timeStr = getCurrentTime();
+
+            let prefixGame = '';
+            if (type === 'แก๊ง') {
+                prefixGame = `แก๊ง ${name}`;
+            } else if (type === 'ครอบครัว') {
+                prefixGame = `ครอบครัว ${name}`;
+            } else {
+                prefixGame = `คุณ ${name}`;
+            }
+
+            if (status === 'ชำระแล้ว') {
+                previewGame.textContent = `โรงพยาบาล Around Town ขอทำการปลดค่าปรับ ${prefixGame} เนื่องจากจ่ายค่าปรับเรียบร้อยแล้วค่ะ/ครับ`;
+            } else {
+                previewGame.textContent = `โรงพยาบาล Around Town เรียกปรับ ${prefixGame} เนื่องจาก ${reason} จำนวน ${amount} กรุณาติดต่อชำระค่าปรับที่โรงพยาบาล ขอบคุณค่ะ/ครับ`;
+            }
+
+            let statusLine = status === 'ชำระแล้ว' ? `+ สถานะ : ${status}` : `- สถานะ : ${status}`;
+
+            previewDiscord.textContent = `# ประกาศค่าปรับ\n\n\`\`\`diff\n${type} : ${name}\nข้อหา : ${reason}\nจำนวนเงินค่าปรับ : ${amount}\nเวลาประกาศปรับ : ${timeStr}\nผู้รับผิดชอบ : ${officer}\n${statusLine}\n\`\`\`\n<@&1473606329536090258>`;
+        }
+
+        setInterval(updatePreviews, 1000);
+
+        function saveToHistory() {
+            const record = { discordText: previewDiscord.textContent };
+            historyData.unshift(record);
+            if (historyData.length > 50) historyData.pop();
+            localStorage.setItem('hospital_fine_history', JSON.stringify(historyData));
+            updateHistoryCount();
+        }
+
+        window.updateHistoryCount = function() {
+            const elem = document.getElementById('historyCount');
+            if(elem) elem.textContent = historyData.length;
+        }
+
+        window.renderHistory = function() {
+            const historyList = document.getElementById('historyList');
+            if(!historyList) return;
+            if (historyData.length === 0) {
+                historyList.innerHTML = `<div class="empty-history">ยังไม่มีประวัติการประกาศค่าปรับ</div>`;
+                return;
+            }
+
+            historyList.innerHTML = historyData.map((item, index) => `
+                <div class="history-item">
+                    <div class="history-content">${item.discordText}</div>
+                    <div class="history-footer">
+                        <span style="font-size: 11px; color: #71717a;">รายการที่ #${historyData.length - index}</span>
+                        <button class="btn-action" style="width: auto; padding: 4px 10px; font-size: 11px; margin-top:0;" onclick="copyHistoryItem(${index})">📋 คัดลอกข้อความนี้</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        window.copyHistoryItem = function(index) {
+            const item = historyData[index];
+            navigator.clipboard.writeText(item.discordText).then(() => {
+                showToast("คัดลอกข้อความประวัติสำเร็จ!");
+                switchTab('create');
+            });
+        }
+
+        window.clearHistory = function() {
+            if (confirm('คุณต้องการล้างประวัติทั้งหมดใช่หรือไม่?')) {
+                historyData = [];
+                localStorage.removeItem('hospital_fine_history');
+                renderHistory();
+                updateHistoryCount();
+                showToast("ล้างประวัติสำเร็จ!");
+            }
+        }
+
+        window.showToast = function(message) {
+            const toast = document.getElementById("toast");
+            if(!toast) return;
+            toast.textContent = message;
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 1800);
+        }
+
+        function triggerButtonAnimation(button, originalText) {
+            button.classList.add('success');
+            button.innerHTML = '✅ คัดลอกสำเร็จ!';
+            setTimeout(() => {
+                button.classList.remove('success');
+                button.innerHTML = originalText;
+            }, 1200);
+        }
+
+        window.copyGameText = function() {
+            navigator.clipboard.writeText(previewGame.textContent).then(() => {
+                showToast("คัดลอกข้อความในเกมสำเร็จ!");
+                triggerButtonAnimation(btnGame, '📋 คัดลอกข้อความในเกม');
+            });
+        }
+
+        window.copyDiscordText = function() {
+            saveToHistory();
+            navigator.clipboard.writeText(previewDiscord.textContent).then(() => {
+                showToast("คัดลอกข้อความ Discord และบันทึกประวัติแล้ว!");
+                triggerButtonAnimation(btnDiscord, '📋 คัดลอกข้อความ Discord');
+                updateHistoryCount();
+            });
+        }
+
+        updateHistoryCount();
+    </script>
+</body>
+</html>

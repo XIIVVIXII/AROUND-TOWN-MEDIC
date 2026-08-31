@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบรันเคสและจัดคิว</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Prompt', sans-serif; background-color: #0f070f; color: #f1f5f9; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1a0b1a; }
+        ::-webkit-scrollbar-thumb { background: #db2777; border-radius: 4px; }
+        input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(1); cursor: pointer; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Navbar / Tabs -->
+    <header class="bg-[#140814] border-b border-pink-900/30">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <h1 class="text-xl font-semibold text-pink-500 flex items-center gap-2 drop-shadow-[0_0_8px_rgba(219,39,119,0.4)]">
+                ⚡ ระบบจัดการเคสและคิว
+            </h1>
+            <nav class="flex bg-[#1f0c1f] p-1 rounded-xl border border-pink-900/40">
+                <button onclick="switchTab('queue')" id="btn-queue" class="px-4 py-2 rounded-lg text-sm font-medium transition-all bg-pink-600 text-white shadow-[0_0_10px_rgba(219,39,119,0.5)]">รันเคส / จัดคิว</button>
+                <button onclick="switchTab('timer')" id="btn-timer" class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-pink-300/70 hover:text-white">จับเวลารันคิว</button>
+                <button onclick="switchTab('history')" id="btn-history" class="px-4 py-2 rounded-lg text-sm font-medium transition-all text-pink-300/70 hover:text-white">ประวัติการรันเคส</button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
+
+        <!-- หน้า 2. รันเคส / จัดคิว -->
+        <section id="tab-queue" class="space-y-6">
+            
+            <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
+                
+                <!-- ฝั่งซ้าย (3 ส่วน): ตารางหลักและเครื่องมือ -->
+                <div class="xl:col-span-3 bg-[#140814] border border-pink-900/40 p-6 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                    
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-pink-900/30 gap-4">
+                        <span class="text-pink-500 font-medium text-base flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(219,39,119,0.8)]"></span> 
+                            หน้า 2. รันเคส / จัดคิว 
+                        </span>
+                        <div class="flex items-center gap-4 text-sm text-pink-200">
+                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                <input type="checkbox" id="toggle-delete-btn" checked onchange="toggleDeleteButtons()" class="accent-pink-600 w-4 h-4 rounded">
+                                แสดงปุ่มลบทั้งหมด
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- ส่วนค้นหาและเพิ่มชื่อ -->
+                    <div class="flex flex-col md:flex-row gap-3 items-center justify-between bg-[#1a0b1a] p-4 rounded-xl border border-pink-900/30 mb-6">
+                        <div class="relative w-full md:w-96">
+                            <input type="text" id="queue-search-input" onclick="showQueueDropdown()" onfocus="showQueueDropdown()" oninput="filterQueueDropdown()" placeholder="-- เลือกรายชื่อเข้าคิว -- (พิมพ์ค้นหา...)" class="w-full bg-[#100510] border border-pink-900/50 rounded-xl px-4 py-2.5 text-sm text-pink-100 placeholder-pink-400/50 focus:outline-none focus:border-pink-500">
+                            <div id="queue-dropdown-list" class="absolute z-20 w-full bg-[#140814] border border-pink-900/60 rounded-xl mt-1 shadow-2xl max-h-48 overflow-y-auto hidden"></div>
+                        </div>
+                        <div class="flex items-center gap-3 w-full md:w-auto">
+                            <button onclick="addSelectedToQueue()" class="flex-1 md:flex-none bg-gradient-to-r from-cyan-500 to-teal-500 hover:from-cyan-400 hover:to-teal-400 text-slate-950 font-medium px-5 py-2.5 rounded-xl text-sm transition-all shadow-[0_0_10px_rgba(20,184,166,0.3)]">
+                                + เพิ่มคนเข้าคิว
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- ตารางคิวหลัก -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-pink-900/30 text-pink-500 font-medium">
+                                    <th class="py-3 px-4">ลำดับคิว</th>
+                                    <th class="py-3 px-4">ชื่อ - สกุล</th>
+                                    <th class="py-3 px-4">สถานะคิว</th>
+                                    <th class="py-3 px-4">การจัดการเคส</th>
+                                    <th class="py-3 px-4 text-right delete-col-header">ลบ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="queue-table-body" class="divide-y divide-pink-950/40"></tbody>
+                        </table>
+                    </div>
+
+                </div>
+
+                <!-- ฝั่งขวานอกกรอบ (1 ส่วน): ช่องสถานะไม่อยู่ ชิดขวาเต็มพื้นที่ว่าง -->
+                <div class="xl:col-span-1 bg-[#140814] border border-pink-900/40 p-5 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)] sticky top-6">
+                    <h3 class="text-sm font-medium text-slate-300 mb-3 flex items-center justify-between border-b border-pink-900/30 pb-3">
+                        <span>🚫 รายชื่อสถานะ "ไม่อยู่"</span>
+                        <span id="absent-count" class="bg-slate-900 text-slate-400 text-xs px-2 py-0.5 rounded-full">0</span>
+                    </h3>
+                    <div id="absent-container" class="space-y-2.5 max-h-[500px] overflow-y-auto">
+                        <div class="text-xs text-slate-500 text-center py-8">ไม่มีรายชื่อที่สถานะไม่อยู่</div>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- หน้าที่ 3: จับเวลารันคิว -->
+        <section id="tab-timer" class="hidden space-y-6">
+            <div class="bg-[#140814] border border-pink-900/40 p-6 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-pink-900/30 gap-4">
+                    <span class="text-pink-500 font-medium text-base flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(219,39,119,0.8)]"></span> 
+                        หน้า 3. จับเวลารันคิว
+                    </span>
+                </div>
+
+                <div class="bg-[#1a0b1a] border border-pink-900/40 p-5 rounded-2xl mb-6 flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div class="relative w-full md:w-96">
+                        <input type="text" id="timer-search-input" onclick="showTimerDropdown()" onfocus="showTimerDropdown()" oninput="filterTimerDropdown()" placeholder="-- เลือกคนเริ่มรันเคส -- (พิมพ์ค้นหา...)" class="w-full bg-[#100510] border border-pink-900/50 rounded-xl px-4 py-2.5 text-sm text-pink-100 placeholder-pink-400/50 focus:outline-none focus:border-pink-500">
+                        <div id="timer-dropdown-list" class="absolute z-20 w-full bg-[#140814] border border-pink-900/60 rounded-xl mt-1 shadow-2xl max-h-48 overflow-y-auto hidden"></div>
+                    </div>
+                    <button onclick="startTimerFromSection()" class="w-full md:w-auto bg-gradient-to-r from-cyan-400 to-teal-400 hover:from-cyan-300 hover:to-teal-300 text-slate-950 font-medium px-6 py-2.5 rounded-xl text-sm transition-all shadow-[0_0_12px_rgba(34,211,238,0.4)] flex items-center justify-center gap-1.5">
+                        ▶ เริ่มรัน
+                    </button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-pink-900/30 text-pink-500 font-medium">
+                                <th class="py-3 px-4">ชื่อคนรัน</th>
+                                <th class="py-3 px-4">วันที่</th>
+                                <th class="py-3 px-4">เวลาเริ่มรัน</th>
+                                <th class="py-3 px-4">สถานะ</th>
+                                <th class="py-3 px-4 text-right">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="active-running-table" class="divide-y divide-pink-950/40">
+                            <tr><td colspan="5" class="py-6 text-center text-pink-300/40">ยังไม่มีเคสที่กำลังรันในขณะนี้</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- หน้าที่ 3: ประวัติการรันเคส -->
+        <section id="tab-history" class="hidden space-y-6">
+            <div class="bg-[#140814] border border-pink-900/40 p-6 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 pb-4 border-b border-pink-900/30 gap-4">
+                    <div class="flex items-center gap-3">
+                        <h2 class="text-lg font-medium text-pink-400">ประวัติการรันเคสทั้งหมด</h2>
+                        <span id="history-display-date" class="bg-pink-950/50 text-pink-300 border border-pink-800/40 px-3 py-1 rounded-xl text-xs font-medium"></span>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="relative flex items-center gap-2 bg-[#1a0b1a] px-3 py-1.5 rounded-xl border border-pink-900/50">
+                            <span class="text-xs text-pink-300">📅 เลือกวันที่ :</span>
+                            <input type="text" id="thai-date-display" readonly onclick="toggleThaiCalendar()" class="bg-transparent text-xs text-pink-100 focus:outline-none cursor-pointer w-28 text-center font-mono">
+                            <input type="date" id="history-date-filter" onchange="onDateChanged(this.value)" class="absolute opacity-0 pointer-events-none w-0 h-0">
+                            <button onclick="resetDateFilter()" class="text-xs text-pink-400 hover:text-white px-1">✕</button>
+                        </div>
+                        <button onclick="clearHistory()" class="text-xs text-rose-400 hover:text-rose-300 font-medium px-2 py-1.5">ล้างประวัติ</button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-sm">
+                        <thead>
+                            <tr class="border-b border-pink-900/30 text-pink-500 font-medium">
+                                <th class="py-3 px-4">ชื่อ - สกุล</th>
+                                <th class="py-3 px-4">เวลาเริ่มรัน</th>
+                                <th class="py-3 px-4">เวลาสิ้นสุด</th>
+                                <th class="py-3 px-4">เวลารวมทั้งหมด</th>
+                            </tr>
+                        </thead>
+                        <tbody id="history-table" class="divide-y divide-pink-950/40">
+                            <tr><td colspan="4" class="py-6 text-center text-pink-300/40">ยังไม่มีประวัติการรันเคส</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript ระบบทำงาน -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
+            authDomain: "around-town-armd-684f7.firebaseapp.com",
+            databaseURL: "https://around-town-armd-684f7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "around-town-armd-684f7",
+            storageBucket: "around-town-armd-684f7.firebasestorage.app",
+            messagingSenderId: "176321996941",
+            appId: "1:176321996941:web:f697ff48100754a4bb9ac4",
+            measurementId: "G-YV720SHKR0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let masterNames = [];
+        let queueList = [];
+        let activeRunning = [];
+        let historyData = [];
+        let selectedQueueName = "";
+        let selectedTimerName = "";
+
+        // ดึงรายชื่อหมอ
+        function fetchDoctorsFromFirebase() {
+            const doctorsRef = ref(db, 'aroundTown/doctors');
+            onValue(doctorsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    masterNames = Object.values(data)
+                        .filter(doc => doc && doc.name)
+                        .map(doc => doc.name);
+                } else {
+                    masterNames = [];
+                }
+            });
+        }
+
+        // ดึงข้อมูลคิวจาก Firebase (เพื่อให้คงอยู่ตลอด)
+        function fetchQueueFromFirebase() {
+            const queueRef = ref(db, 'aroundTown/queueList');
+            onValue(queueRef, (snapshot) => {
+                const data = snapshot.val();
+                queueList = data ? Object.values(data) : [];
+                renderQueueTable();
+            });
+        }
+
+        // ดึงข้อมูลกำลังจับเวลาจาก Firebase (เพื่อให้คงอยู่ตลอด)
+        function fetchActiveRunningFromFirebase() {
+            const runningRef = ref(db, 'aroundTown/activeRunning');
+            onValue(runningRef, (snapshot) => {
+                const data = snapshot.val();
+                activeRunning = data ? Object.values(data) : [];
+                renderActiveRunning();
+            });
+        }
+
+        // บันทึกคิวลง Firebase
+        function saveQueueToFirebase() {
+            set(ref(db, 'aroundTown/queueList'), queueList);
+        }
+
+        // บันทึกกำลังจับเวลาลง Firebase
+        function saveActiveRunningToFirebase() {
+            set(ref(db, 'aroundTown/activeRunning'), activeRunning);
+        }
+
+        fetchDoctorsFromFirebase();
+        fetchQueueFromFirebase();
+        fetchActiveRunningFromFirebase();
+
+        function formatThaiDate(isoStr) {
+            if (!isoStr) return "";
+            const [year, month, day] = isoStr.split('-');
+            const thaiYear = parseInt(year) + 543;
+            return `${day}/${month}/${thaiYear}`;
+        }
+
+        function sortNamesThai(namesArray) {
+            return [...namesArray].sort((a, b) => {
+                return a.localeCompare(b, 'th', { numeric: true, sensitivity: 'base' });
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayIso = `${year}-${month}-${day}`;
+
+            const dateFilter = document.getElementById('history-date-filter');
+            const thaiDateDisplay = document.getElementById('thai-date-display');
+            
+            if (dateFilter) dateFilter.value = todayIso;
+            if (thaiDateDisplay) thaiDateDisplay.value = formatThaiDate(todayIso);
+            
+            renderHistoryTable();
+        });
+
+        window.toggleThaiCalendar = function() {
+            document.getElementById('history-date-filter').showPicker();
+        }
+
+        window.onDateChanged = function(val) {
+            document.getElementById('thai-date-display').value = formatThaiDate(val);
+            renderHistoryTable();
+        }
+
+        window.switchTab = function(tabName) {
+            ['queue', 'timer', 'history'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`btn-${t}`).className = "px-4 py-2 rounded-lg text-sm font-medium transition-all text-pink-300/70 hover:text-white";
+            });
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+            document.getElementById(`btn-${tabName}`).className = "px-4 py-2 rounded-lg text-sm font-medium transition-all bg-pink-600 text-white shadow-[0_0_10px_rgba(219,39,119,0.5)]";
+            
+            if(tabName === 'history') {
+                renderHistoryTable();
+            }
+        }
+
+        // --- Dropdown หน้าจัดคิว ---
+        window.showQueueDropdown = function() {
+            const dropdown = document.getElementById('queue-dropdown-list');
+            const keyword = document.getElementById('queue-search-input').value.toLowerCase();
+            
+            const filtered = sortNamesThai(masterNames.filter(name => name.toLowerCase().includes(keyword)));
+            
+            if (filtered.length === 0) {
+                dropdown.innerHTML = `<div class="p-3 text-xs text-pink-300/50 text-center">ไม่พบรายชื่อในระบบ</div>`;
+            } else {
+                dropdown.innerHTML = filtered.map(name => `
+                    <div onclick="selectQueueName('${name}')" class="px-4 py-2.5 hover:bg-pink-950/60 cursor-pointer text-sm text-pink-100 border-b border-pink-950 last:border-none">
+                        ${name}
+                    </div>
+                `).join('');
+            }
+            dropdown.classList.remove('hidden');
+        }
+
+        window.filterQueueDropdown = function() {
+            window.showQueueDropdown();
+        }
+
+        window.selectQueueName = function(name) {
+            selectedQueueName = name;
+            document.getElementById('queue-search-input').value = name;
+            document.getElementById('queue-dropdown-list').classList.add('hidden');
+        }
+
+        // --- Dropdown หน้าเวลารันคิว ---
+        window.showTimerDropdown = function() {
+            const dropdown = document.getElementById('timer-dropdown-list');
+            const keyword = document.getElementById('timer-search-input').value.toLowerCase();
+            
+            const filtered = sortNamesThai(masterNames.filter(name => name.toLowerCase().includes(keyword)));
+            
+            if (filtered.length === 0) {
+                dropdown.innerHTML = `<div class="p-3 text-xs text-pink-300/50 text-center">ไม่พบรายชื่อในระบบ</div>`;
+            } else {
+                dropdown.innerHTML = filtered.map(name => `
+                    <div onclick="selectTimerName('${name}')" class="px-4 py-2.5 hover:bg-pink-950/60 cursor-pointer text-sm text-pink-100 border-b border-pink-950 last:border-none">
+                        ${name}
+                    </div>
+                `).join('');
+            }
+            dropdown.classList.remove('hidden');
+        }
+
+        window.filterTimerDropdown = function() {
+            window.showTimerDropdown();
+        }
+
+        window.selectTimerName = function(name) {
+            selectedTimerName = name;
+            document.getElementById('timer-search-input').value = name;
+            document.getElementById('timer-dropdown-list').classList.add('hidden');
+        }
+
+        // ปิด Dropdown เมื่อคลิกข้างนอก
+        window.addEventListener('click', function(e) {
+            if (!e.target.closest('#queue-search-input') && !e.target.closest('#queue-dropdown-list')) {
+                const qDrop = document.getElementById('queue-dropdown-list');
+                if (qDrop) qDrop.classList.add('hidden');
+            }
+            if (!e.target.closest('#timer-search-input') && !e.target.closest('#timer-dropdown-list')) {
+                const tDrop = document.getElementById('timer-dropdown-list');
+                if (tDrop) tDrop.classList.add('hidden');
+            }
+        });
+
+        window.addSelectedToQueue = function() {
+            const inputVal = document.getElementById('queue-search-input').value.trim();
+            const nameToAdd = selectedQueueName || inputVal;
+            if (!nameToAdd) return;
+
+            queueList.push({
+                id: Date.now(),
+                name: nameToAdd,
+                status: "พร้อมรับเคส",
+                state: "normal"
+            });
+
+            selectedQueueName = "";
+            document.getElementById('queue-search-input').value = "";
+            saveQueueToFirebase();
+            renderQueueTable();
+        }
+
+        function updateQueueStatesAutomatically() {
+            const activeQueue = queueList.filter(item => item.status === "พร้อมรับเคส");
+            let foundNext = false;
+            
+            activeQueue.forEach(item => {
+                if (item.state === "normal") {
+                    if (!foundNext) {
+                        item.state = "waiting"; 
+                        foundNext = true;
+                    }
+                } else if (item.state === "waiting") {
+                    if (foundNext) {
+                        item.state = "normal"; 
+                    } else {
+                        foundNext = true; 
+                    }
+                }
+            });
+
+            let hasWaitingOrRunning = activeQueue.some(q => q.state === "waiting" || q.state === "running");
+            if (!hasWaitingOrRunning && activeQueue.length > 0) {
+                activeQueue.forEach(q => {
+                    if (q.state === "finished") {
+                        q.state = "normal";
+                    }
+                });
+                let firstAvailable = activeQueue.find(q => q.status === "พร้อมรับเคส");
+                if (firstAvailable) {
+                    firstAvailable.state = "waiting";
+                }
+            }
+        }
+
+        function renderQueueTable() {
+            updateQueueStatesAutomatically();
+
+            const tbody = document.getElementById('queue-table-body');
+            const absentContainer = document.getElementById('absent-container');
+            const absentCountBadge = document.getElementById('absent-count');
+
+            if (!tbody) return;
+
+            const activeQueue = queueList.filter(item => item.status === "พร้อมรับเคส");
+            const absentQueue = queueList.filter(item => item.status === "ไม่อยู่");
+
+            if (activeQueue.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-pink-300/40">ไม่มีคิวที่พร้อมรับเคสในระบบ</td></tr>`;
+            } else {
+                tbody.innerHTML = activeQueue.map((item, index) => {
+                    let subStatusHtml = "";
+                    let actionButtonsHtml = "";
+
+                    if (item.state === "running") {
+                        subStatusHtml = `<div class="text-xs text-pink-400 font-medium mt-0.5">🔥 กำลังไป / รับเคสแล้ว</div>`;
+                        actionButtonsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="finishCase(${item.id})" class="bg-cyan-500 hover:bg-cyan-400 text-slate-950 font-medium px-3.5 py-1.5 rounded-lg text-xs transition-all shadow-[0_0_10px_rgba(6,182,212,0.4)] flex items-center gap-1">✓ เคสเสร็จสิ้น</button>
+                                <button onclick="setWarningCase(${item.id})" class="bg-amber-950/60 hover:bg-amber-900 text-amber-300 border border-amber-800/50 px-2.5 py-1.5 rounded-lg text-xs transition-all">⚠️ เคสมีปัญหา</button>
+                            </div>
+                        `;
+                    } else if (item.state === "finished") {
+                        subStatusHtml = `<div class="text-xs text-teal-400 font-medium mt-0.5">✔ เคสเสร็จสิ้นแล้ว (รอรอบถัดไป)</div>`;
+                        actionButtonsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="startRunCase(${item.id})" class="bg-pink-600 hover:bg-pink-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-[0_0_10px_rgba(219,39,119,0.5)] flex items-center gap-1.5">
+                                    ✋ รับเคส
+                                </button>
+                                <span class="text-xs text-teal-500/70">ผ่านรอบนี้แล้ว</span>
+                            </div>
+                        `;
+                    } else if (item.state === "warning") {
+                        subStatusHtml = `<div class="text-xs text-rose-400 font-medium mt-0.5">⚠️ เคสนี้มีปัญหา รอรับเคสอีกรอบ</div>`;
+                        actionButtonsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="startRunCase(${item.id})" class="bg-pink-600 hover:bg-pink-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-[0_0_10px_rgba(219,39,119,0.5)] flex items-center gap-1.5">
+                                    ✋ รับเคส
+                                </button>
+                                <button onclick="setWarningCase(${item.id})" class="bg-amber-950/60 hover:bg-amber-900 text-amber-300 border border-amber-800/50 px-2.5 py-1.5 rounded-lg text-xs transition-all">⚠️</button>
+                            </div>
+                        `;
+                    } else if (item.state === "waiting") {
+                        subStatusHtml = `<div class="text-xs text-amber-400 font-medium mt-0.5">🔔 ถึงคิวแล้ว (รอรับเคส)</div>`;
+                        actionButtonsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="startRunCase(${item.id})" class="bg-pink-600 hover:bg-pink-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-[0_0_10px_rgba(219,39,119,0.5)] flex items-center gap-1.5">
+                                    ✋ รับเคส
+                                </button>
+                                <button onclick="setWarningCase(${item.id})" class="bg-amber-950/60 hover:bg-amber-900 text-amber-300 border border-amber-800/50 px-2.5 py-1.5 rounded-lg text-xs transition-all">⚠️</button>
+                            </div>
+                        `;
+                    } else {
+                        subStatusHtml = `<div class="text-xs text-pink-300/40 mt-0.5">รอคิวถัดไป</div>`;
+                        actionButtonsHtml = `
+                            <div class="flex items-center gap-2">
+                                <button onclick="startRunCase(${item.id})" class="bg-pink-600/70 hover:bg-pink-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-[0_0_8px_rgba(219,39,119,0.3)] flex items-center gap-1.5">
+                                    ✋ รับเคส
+                                </button>
+                                <button onclick="setWarningCase(${item.id})" class="bg-amber-950/60 hover:bg-amber-900 text-amber-300 border border-amber-800/50 px-2.5 py-1.5 rounded-lg text-xs transition-all">⚠️</button>
+                            </div>
+                        `;
+                    }
+
+                    return `
+                        <tr class="border-b border-pink-950/30 hover:bg-pink-950/10">
+                            <td class="py-3.5 px-4 font-bold text-pink-300">#${index + 1}</td>
+                            <td class="py-3.5 px-4">
+                                <div class="text-pink-100 font-medium">${item.name}</div>
+                                ${subStatusHtml}
+                            </td>
+                            <td class="py-3.5 px-4">
+                                <select onchange="updateStatus(${item.id}, this.value)" class="bg-[#100510] border border-pink-900/50 rounded-lg px-3 py-1.5 text-xs text-pink-200 focus:outline-none focus:border-pink-500">
+                                    <option value="พร้อมรับเคส" ${item.status === 'พร้อมรับเคส' ? 'selected' : ''}>พร้อมรับเคส</option>
+                                    <option value="ไม่อยู่" ${item.status === 'ไม่อยู่' ? 'selected' : ''}>ไม่อยู่</option>
+                                </select>
+                            </td>
+                            <td class="py-3.5 px-4">
+                                ${actionButtonsHtml}
+                            </td>
+                            <td class="py-3.5 px-4 text-right delete-col-item">
+                                <button onclick="removeQueueItem(${item.id})" class="bg-rose-950/60 hover:bg-rose-900 text-rose-400 border border-rose-900/50 p-2 rounded-lg text-xs transition-all shadow-[0_0_8px_rgba(244,63,94,0.3)]">
+                                    🗑️
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+            }
+
+            if (absentCountBadge) absentCountBadge.innerText = absentQueue.length;
+            if (absentContainer) {
+                if (absentQueue.length === 0) {
+                    absentContainer.innerHTML = `<div class="text-xs text-slate-500 text-center py-8">ไม่มีรายชื่อที่สถานะไม่อยู่</div>`;
+                } else {
+                    absentContainer.innerHTML = absentQueue.map(item => `
+                        <div class="bg-[#100510] border border-pink-900/40 p-3 rounded-xl flex items-center justify-between gap-2">
+                            <div class="min-w-0 flex-1">
+                                <div class="text-sm font-medium text-slate-200 truncate">${item.name}</div>
+                                <div class="text-[10px] text-slate-400">สถานะ: ไม่อยู่</div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <select onchange="updateStatus(${item.id}, this.value)" class="bg-slate-900 border border-slate-700 rounded-lg px-2 py-1 text-xs text-slate-200 focus:outline-none">
+                                    <option value="ไม่อยู่" selected>ไม่อยู่</option>
+                                    <option value="พร้อมรับเคส">พร้อมรับเคส</option>
+                                </select>
+                                <button onclick="removeQueueItem(${item.id})" class="text-rose-400 hover:text-rose-300 text-xs p-1 delete-col-item">🗑️</button>
+                            </div>
+                        </div>
+                    `).join('');
+                }
+            }
+
+            window.toggleDeleteButtons();
+        }
+
+        window.updateStatus = function(id, newStatus) {
+            const index = queueList.findIndex(q => q.id === id);
+            if (index !== -1) {
+                queueList[index].status = newStatus;
+                saveQueueToFirebase();
+                renderQueueTable();
+            }
+        }
+
+        window.startRunCase = function(id) {
+            const item = queueList.find(q => q.id === id);
+            if (item) {
+                item.state = "running";
+                saveQueueToFirebase();
+            }
+            renderQueueTable();
+        }
+
+        window.startTimerFromSection = function() {
+            const inputVal = document.getElementById('timer-search-input').value.trim();
+            const nameToRun = selectedTimerName || inputVal;
+            if (!nameToRun) return;
+
+            const now = new Date();
+            const dateStr = `${now.getDate().toString().padStart(2, '0')}/${(now.getMonth() + 1).toString().padStart(2, '0')}/${now.getFullYear() + 543}`;
+            const isoDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const timeStr = now.toTimeString().split(' ')[0];
+
+            activeRunning.push({
+                id: Date.now(),
+                name: nameToRun,
+                dateString: dateStr,
+                isoDate: isoDateStr,
+                startTimeString: timeStr,
+                startTimestamp: now.getTime()
+            });
+
+            selectedTimerName = "";
+            document.getElementById('timer-search-input').value = "";
+            saveActiveRunningToFirebase();
+            renderActiveRunning();
+        }
+
+        window.finishCase = function(id) {
+            const item = queueList.find(q => q.id === id);
+            if (item) {
+                item.state = "finished"; 
+                saveQueueToFirebase();
+            }
+            renderQueueTable();
+        }
+
+        window.setWarningCase = function(id) {
+            const item = queueList.find(q => q.id === id);
+            if (item) {
+                item.state = "warning";
+                saveQueueToFirebase();
+            }
+            renderQueueTable();
+        }
+
+        window.removeQueueItem = function(id) {
+            queueList = queueList.filter(q => q.id !== id);
+            saveQueueToFirebase();
+            renderQueueTable();
+        }
+
+        window.toggleDeleteButtons = function() {
+            const toggleElem = document.getElementById('toggle-delete-btn');
+            const isChecked = toggleElem ? toggleElem.checked : false;
+            document.querySelectorAll('.delete-col-header, .delete-col-item').forEach(el => {
+                el.style.display = isChecked ? '' : 'none';
+            });
+        }
+
+        function renderActiveRunning() {
+            const tbody = document.getElementById('active-running-table');
+            if (!tbody) return;
+            if (activeRunning.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="py-6 text-center text-pink-300/40">ยังไม่มีเคสที่กำลังรันในขณะนี้</td></tr>`;
+                return;
+            }
+            tbody.innerHTML = activeRunning.map(item => `
+                <tr class="border-b border-pink-950/30">
+                    <td class="py-3 px-4 font-medium text-pink-100">${item.name}</td>
+                    <td class="py-3 px-4 text-pink-300/80 text-xs">${item.dateString}</td>
+                    <td class="py-3 px-4 text-pink-300/80 text-xs font-mono">${item.startTimeString}</td>
+                    <td class="py-3 px-4"><span class="bg-amber-950/60 text-amber-400 border border-amber-800/50 px-3 py-1 rounded-full text-xs font-medium">กำลังรัน</span></td>
+                    <td class="py-3 px-4 text-right">
+                        <button onclick="endTimer(${item.id})" class="bg-amber-500 hover:bg-amber-400 text-slate-950 font-medium px-4 py-1.5 rounded-xl text-xs transition-all shadow-[0_0_10px_rgba(245,158,11,0.4)]">จบรัน</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        window.endTimer = function(id) {
+            const index = activeRunning.findIndex(item => item.id === id);
+            if (index === -1) return;
+            const item = activeRunning[index];
+            const endTime = new Date();
+            const diffSec = Math.floor((endTime.getTime() - item.startTimestamp) / 1000);
+            const hours = Math.floor(diffSec / 3600);
+            const minutes = Math.floor((diffSec % 3600) / 60);
+            const seconds = diffSec % 60;
+            const totalDuration = `${hours} ชม. ${minutes} นาที ${seconds} วิ`;
+
+            historyData.unshift({
+                name: item.name,
+                dateString: item.dateString,
+                isoDate: item.isoDate,
+                start: item.startTimeString,
+                end: endTime.toTimeString().split(' ')[0],
+                duration: totalDuration
+            });
+
+            activeRunning.splice(index, 1);
+            saveActiveRunningToFirebase();
+            renderActiveRunning();
+            renderHistoryTable();
+        }
+
+        function renderHistoryTable() {
+            const tbody = document.getElementById('history-table');
+            const dateFilterElem = document.getElementById('history-date-filter');
+            const displayDateElem = document.getElementById('history-display-date');
+            
+            if (!tbody || !dateFilterElem) return;
+
+            const filterDate = dateFilterElem.value;
+            if (displayDateElem) {
+                displayDateElem.innerText = `📅 วันที่: ${formatThaiDate(filterDate)}`;
+            }
+
+            let filteredData = historyData;
+            if (filterDate) {
+                filteredData = historyData.filter(item => item.isoDate === filterDate);
+            }
+
+            if (filteredData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-pink-300/40">ยังไม่มีประวัติการรันเคสในวันที่เลือก</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filteredData.map(item => `
+                <tr class="border-b border-pink-950/30">
+                    <td class="py-3 px-4 font-medium text-pink-100">${item.name}</td>
+                    <td class="py-3 px-4 text-xs text-pink-300/80 font-mono">${item.start}</td>
+                    <td class="py-3 px-4 text-xs text-pink-300/80 font-mono">${item.end}</td>
+                    <td class="py-3 px-4 font-medium text-pink-400">${item.duration}</td>
+                </tr>
+            `).join('');
+        }
+
+        window.resetDateFilter = function() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const todayIso = `${year}-${month}-${day}`;
+
+            document.getElementById('history-date-filter').value = todayIso;
+            document.getElementById('thai-date-display').value = formatThaiDate(todayIso);
+            renderHistoryTable();
+        }
+
+        window.clearHistory = function() {
+            historyData = [];
+            renderHistoryTable();
+        }
+    </script>
+</body>
+</html>

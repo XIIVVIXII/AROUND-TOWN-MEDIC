@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบประกาศโรงพยาบาล Around Town</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --input-bg: #262626;
+            --border-color: #333333;
+            --primary-color: #ff4757;
+            --primary-hover: #ff6b81;
+            --text-color: #ffffff;
+            --text-muted: #a1a1aa;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 15px;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 20px 24px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            text-align: center;
+            color: var(--primary-color);
+            margin: 0 0 15px 0;
+            font-size: 22px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .nav-tab {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.2s;
+            font-size: 14px;
+        }
+
+        .nav-tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            align-items: start;
+        }
+
+        .form-column {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .form-group {
+            width: 100%;
+        }
+
+        .preview-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            background: rgba(0, 0, 0, 0.2);
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 4px;
+            font-weight: 600;
+            color: #d1d5db;
+            font-size: 13px;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 10px 12px;
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .preview-box {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 12px;
+            font-family: monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            color: #e2e8f0;
+            font-size: 13px;
+            line-height: 1.5;
+            min-height: 70px;
+            max-height: 180px;
+            overflow-y: auto;
+        }
+
+        .btn-action {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            transition: background 0.2s;
+            font-size: 13px;
+        }
+
+        .btn-action:hover {
+            background: var(--primary-hover);
+        }
+
+        .btn-action.success {
+            background: #2ed573 !important;
+        }
+
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 12px;
+            position: fixed;
+            z-index: 1000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.5s, fadeout 0.5s 1.5s;
+        }
+
+        @keyframes fadein {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
+
+        .history-item {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 12px;
+        }
+
+        .history-content {
+            font-family: monospace;
+            white-space: pre-wrap;
+            font-size: 13px;
+            margin-bottom: 10px;
+            background: #111;
+            padding: 10px;
+            border-radius: 4px;
+        }
+
+        .history-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 30px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏥 ระบบประกาศโรงพยาบาล Around Town</h2>
+
+    <div class="nav-tabs">
+        <div class="nav-tab active" onclick="switchTab('create')"> สร้างประกาศ</div>
+        <div class="nav-tab" onclick="switchTab('history')"> ประวัติการประกาศ (<span id="historyCount">0</span>)</div>
+    </div>
+
+    <!-- Tab 1: สร้างประกาศ -->
+    <div id="tabCreate" class="tab-content active">
+        <div class="form-grid">
+            <!-- คอลัมน์ซ้าย: ฟอร์มกรอกข้อมูล -->
+            <div class="form-column">
+                <div class="form-group">
+                    <label for="noticeType">ประเภทประกาศ :</label>
+                    <select id="noticeType" onchange="toggleNoticeFields()">
+                        <option value="ตักเตือน">ประกาศตักเตือน</option>
+                        <option value="Blacklist">ประกาศ Blacklist</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="groupTargetType">
+                    <label for="targetType">เป้าหมาย :</label>
+                    <select id="targetType" onchange="onTargetTypeChange()">
+                        <option value="แก๊ง">แก๊ง</option>
+                        <option value="ครอบครัว">ครอบครัว</option>
+                        <option value="คุณ">บุคคล</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="targetNameSearch" id="targetNameLabel">แก๊ง :</label>
+                    <input type="text" id="targetNameSearch" list="targetNameList" placeholder="พิมพ์ชื่อหรือเลือก...">
+                    <datalist id="targetNameList"></datalist>
+                </div>
+
+                <div class="form-group" id="groupReason">
+                    <label for="fineReasonSearch">ข้อหา / หัวข้อ :</label>
+                    <input type="text" id="fineReasonSearch" list="fineReasonList" placeholder="พิมพ์เพื่อค้นหาข้อหา...">
+                    <datalist id="fineReasonList"></datalist>
+                </div>
+
+                <div class="form-group" id="groupAmount" style="display: none;">
+                    <label for="fineAmount">จำนวนเงินค่าปรับ :</label>
+                    <input type="text" id="fineAmount" placeholder="เช่น 5,000,000 หรือ 10 / ตักเตือน" oninput="formatFineInput(this); updatePreviews()">
+                </div>
+
+                <div class="form-group" id="groupWarning">
+                    <label for="warningLevel">ระดับการเตือน :</label>
+                    <select id="warningLevel">
+                        <option value="เตือนครั้งที่ 1">เตือนครั้งที่ 1</option>
+                        <option value="เตือนครั้งที่ 2">เตือนครั้งที่ 2</option>
+                        <option value="เตือนครั้งที่ 3">เตือนครั้งที่ 3</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="groupStatus" style="display: none;">
+                    <label for="paymentStatus">สถานะการชำระเงิน :</label>
+                    <select id="paymentStatus" onchange="updatePreviews()">
+                        <option value="ยังไม่ชำระ">ยังไม่ชำระ</option>
+                        <option value="ชำระแล้ว">ชำระแล้ว </option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- คอลัมน์ขวา: พรีวิวและปุ่มคัดลอก -->
+            <div class="form-column">
+                <div class="preview-group">
+                    <label>📄 ข้อความสำหรับในเกม</label>
+                    <div id="previewGame" class="preview-box"></div>
+                    <button class="btn-action" id="btnGame" onclick="copyGameText()">📋 คัดลอกข้อความในเกม</button>
+                </div>
+
+                <div class="preview-group">
+                    <label>💬 ข้อความสำหรับDiscord</label>
+                    <div id="previewDiscord" class="preview-box"></div>
+                    <button class="btn-action" id="btnDiscord" onclick="copyDiscordText()">📋 คัดลอกข้อความ Discord</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab 2: ประวัติการประกาศ -->
+    <div id="tabHistory" class="tab-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3 style="margin: 0; font-size: 16px;">ประวัติย้อนหลัง</h3>
+            <button class="btn-action" style="width: auto; background: #e74c3c; padding: 6px 14px; margin-top: 0; font-size: 12px;" onclick="clearHistory()">🗑️ ล้างประวัติทั้งหมด</button>
+        </div>
+        <div id="historyList"></div>
+    </div>
+</div>
+
+<div id="toast">ดำเนินการสำเร็จ</div>
+
+<!-- Firebase SDK Import -->
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+    import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
+        authDomain: "around-town-armd-684f7.firebaseapp.com",
+        databaseURL: "https://around-town-armd-684f7-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "around-town-armd-684f7",
+        storageBucket: "around-town-armd-684f7.firebasestorage.app",
+        messagingSenderId: "176321996941",
+        appId: "1:176321996941:web:f697ff48100754a4bb9ac4",
+        measurementId: "G-YV720SHKR0"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const noticeTypeSelect = document.getElementById('noticeType');
+    const targetTypeSelect = document.getElementById('targetType');
+    const targetNameLabel = document.getElementById('targetNameLabel');
+    const targetNameSearch = document.getElementById('targetNameSearch');
+    const targetNameList = document.getElementById('targetNameList');
+    const fineReasonSearch = document.getElementById('fineReasonSearch');
+    const fineReasonList = document.getElementById('fineReasonList');
+    const fineAmountInput = document.getElementById('fineAmount');
+    const warningLevelSelect = document.getElementById('warningLevel');
+    const paymentStatusSelect = document.getElementById('paymentStatus');
+
+    const groupTargetType = document.getElementById('groupTargetType');
+    const groupAmount = document.getElementById('groupAmount');
+    const groupWarning = document.getElementById('groupWarning');
+    const groupStatus = document.getElementById('groupStatus');
+
+    const previewGame = document.getElementById('previewGame');
+    const previewDiscord = document.getElementById('previewDiscord');
+
+    const btnGame = document.getElementById('btnGame');
+    const btnDiscord = document.getElementById('btnDiscord');
+
+    let historyData = [];
+    let rawCitizens = [];
+    let rawRules = [];
+
+    function formatFineInput(input) {
+        let val = input.value;
+        let parts = val.split('/');
+        let numStr = parts[0].replace(/[^\d]/g, '');
+        
+        if (numStr) {
+            let formattedNum = Number(numStr).toLocaleString('en-US');
+            if (parts.length > 1) {
+                input.value = formattedNum + ' / ' + parts.slice(1).join('/').trim();
+            } else {
+                let textAfterNum = val.replace(/[\d,]/g, '').trim();
+                if (textAfterNum && !val.includes('/')) {
+                    input.value = formattedNum + ' ' + textAfterNum;
+                } else {
+                    input.value = formattedNum;
+                }
+            }
+        } else if (val.includes('/')) {
+            input.value = ' / ' + parts.slice(1).join('/').trim();
+        }
+        updatePreviews();
+    }
+    window.formatFineInput = formatFineInput;
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+
+        if (tabName === 'create') {
+            document.getElementById('tabCreate').classList.add('active');
+            document.querySelectorAll('.nav-tab')[0].classList.add('active');
+        } else {
+            document.getElementById('tabHistory').classList.add('active');
+            document.querySelectorAll('.nav-tab')[1].classList.add('active');
+            renderHistory();
+        }
+    }
+    window.switchTab = switchTab;
+
+    function toggleNoticeFields() {
+        const type = noticeTypeSelect.value;
+        if (type === 'ตักเตือน') {
+            groupTargetType.style.display = 'block';
+            groupAmount.style.display = 'none';
+            groupWarning.style.display = 'block';
+            groupStatus.style.display = 'none';
+        } else if (type === 'Blacklist') {
+            groupTargetType.style.display = 'block';
+            groupAmount.style.display = 'block';
+            groupWarning.style.display = 'none';
+            groupStatus.style.display = 'block';
+        }
+        updatePreviews();
+    }
+    window.toggleNoticeFields = toggleNoticeFields;
+
+    function onTargetTypeChange() {
+        const val = targetTypeSelect.value;
+        targetNameLabel.textContent = val + ' :';
+        targetNameSearch.value = '';
+        populateTargetNames();
+        updatePreviews();
+    }
+    window.onTargetTypeChange = onTargetTypeChange;
+
+    function populateTargetNames() {
+        const currentType = targetTypeSelect.value;
+        targetNameList.innerHTML = '';
+        const filtered = rawCitizens.filter(c => c.type === currentType);
+        filtered.forEach(item => {
+            const opt = document.createElement('option');
+            opt.value = item.name;
+            targetNameList.appendChild(opt);
+        });
+    }
+
+    function populateRules() {
+        fineReasonList.innerHTML = '';
+        rawRules.forEach(rule => {
+            const opt = document.createElement('option');
+            const clauseNo = rule.no || '';
+            const ruleName = rule.name || '';
+            const ruleFine = rule.fine || '';
+            
+            if (rule.customDisplay) {
+                opt.value = rule.customDisplay;
+            } else {
+                opt.value = clauseNo ? `ข้อ ${clauseNo}: ${ruleName}` : ruleName;
+            }
+            
+            if (ruleFine) {
+                opt.label = `ค่าปรับ: ${ruleFine}`;
+            }
+            fineReasonList.appendChild(opt);
+        });
+    }
+
+    function onReasonInputChange() {
+        const rawRuleInput = fineReasonSearch.value.trim();
+        const matchedRule = rawRules.find(r => {
+            const standardStr = r.no ? `ข้อ ${r.no}: ${r.name}` : r.name;
+            return standardStr === rawRuleInput || r.name === rawRuleInput || (r.customDisplay && r.customDisplay === rawRuleInput);
+        });
+
+        if (matchedRule && matchedRule.fine) {
+            fineAmountInput.value = matchedRule.fine;
+            formatFineInput(fineAmountInput);
+        }
+        updatePreviews();
+    }
+    window.onReasonInputChange = onReasonInputChange;
+
+    function getCurrentTime() {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        return `${hours}:${minutes} น.`;
+    }
+
+    function getCurrentDate() {
+        const now = new Date();
+        const day = String(now.getDate()).padStart(2, '0');
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const year = String(now.getFullYear());
+        return `${day}/${month}/${year}`;
+    }
+
+    function parseSelectedRule(inputStr) {
+        if (!inputStr) return { clause: '1', reason: '.....' };
+        
+        const match = inputStr.match(/^ข้อ\s*([^:]+):\s*(.*)$/);
+        if (match) {
+            return { clause: match[1].trim(), reason: match[2].trim() };
+        }
+        
+        const found = rawRules.find(r => r.name === inputStr || r.no === inputStr || (r.customDisplay && r.customDisplay === inputStr));
+        if (found) {
+            return { clause: found.no || '1', reason: found.name || inputStr };
+        }
+        return { clause: '1', reason: inputStr };
+    }
+
+    function updatePreviews() {
+        const noticeType = noticeTypeSelect.value;
+        const targetType = targetTypeSelect.value;
+        const name = targetNameSearch.value.trim() || '.....';
+        
+        const rawRuleInput = fineReasonSearch.value.trim();
+        const parsedRule = parseSelectedRule(rawRuleInput);
+        const reason = parsedRule.reason;
+        const blClause = parsedRule.clause;
+
+        let rawAmountText = fineAmountInput.value.trim() || '...';
+        let formattedAmount = rawAmountText;
+        
+        if (formattedAmount.includes('/')) {
+            let parts = formattedAmount.split('/');
+            let numPart = parts[0].trim();
+            let textPart = parts.slice(1).join('/').trim();
+            
+            numPart = numPart.replace(/ic/gi, '').trim();
+            textPart = textPart.replace(/ic/gi, '').trim();
+            
+            if (textPart) {
+                formattedAmount = `${numPart} IC / ${textPart}`;
+            } else {
+                formattedAmount = `${numPart} IC`;
+            }
+        } else {
+            if (!formattedAmount.toLowerCase().includes('ic')) {
+                formattedAmount += ' IC';
+            }
+        }
+
+        const warning = warningLevelSelect.value;
+        const status = paymentStatusSelect.value;
+        const timeStr = getCurrentTime();
+        const dateStr = getCurrentDate();
+
+        let targetDisplayGame = '';
+        let discordLabelKey = targetType;
+
+        if (targetType === 'แก๊ง') {
+            targetDisplayGame = `แก๊ง ${name}`;
+            discordLabelKey = 'แก๊ง';
+        } else if (targetType === 'ครอบครัว') {
+            targetDisplayGame = `ครอบครัว ${name}`;
+            discordLabelKey = 'ครอบครัว';
+        } else {
+            targetDisplayGame = `คุณ ${name}`;
+            discordLabelKey = 'คุณ';
+        }
+
+        if (noticeType === 'ตักเตือน') {
+            previewGame.textContent = `โรงพยาบาล Around Town ขอทำการประกาศตักเตือน ${targetDisplayGame} เนื่องจาก ${reason} ${warning} ขอบคุณค่ะ/ครับ`;
+            previewDiscord.textContent = `# ประกาศตักเตือน\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nข้อหา : ${reason}\nตักเตือน : ${warning}\nเวลาประกาศ : ${timeStr}\n\`\`\`\n<@&1473606329536090258>`;
+        } 
+        else if (noticeType === 'Blacklist') {
+            if (status === 'ชำระแล้ว') {
+                previewGame.textContent = `โรงพยาบาล Around Town ทำการปลด Blacklist ${targetDisplayGame} เนื่องจากจ่ายค่าปรับเรียบร้อยแล้วค่ะ/ครับ`;
+                previewDiscord.textContent = `#  ⛔  __ BLACKLIST __  ⛔\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nหัวข้อ : BLACKLIST ข้อที่ ${blClause} เนื่องจาก  ${reason}\n( เมื่อเวลา ${timeStr} วันที่ ${dateStr} )\nค่าปรับ : ${formattedAmount}\n+สถานะ : ชำระแล้ว\n\`\`\`\n<@&1473606329536090258>`;
+            } else {
+                previewGame.textContent = `โรงพยาบาล Around Town ทำการ Blacklist ${targetDisplayGame} เนื่องจาก ${reason} ขอบคุณค่ะ/ครับ`;
+                previewDiscord.textContent = `#  ⛔  __ BLACKLIST __  ⛔\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nหัวข้อ : BLACKLIST ข้อที่ ${blClause} เนื่องจาก  ${reason}\n( เมื่อเวลา ${timeStr} วันที่ ${dateStr} )\nค่าปรับ : ${formattedAmount}\n-สถานะ : ยังไม่ชำระ\n\`\`\`\n<@&1473606329536090258>`;
+            }
+        }
+    }
+
+    targetNameSearch.addEventListener('input', updatePreviews);
+    targetNameSearch.addEventListener('change', updatePreviews);
+    targetNameSearch.addEventListener('blur', updatePreviews);
+
+    fineReasonSearch.addEventListener('input', () => { onReasonInputChange(); updatePreviews(); });
+    fineReasonSearch.addEventListener('change', () => { onReasonInputChange(); updatePreviews(); });
+    fineReasonSearch.addEventListener('blur', () => { onReasonInputChange(); updatePreviews(); });
+
+    noticeTypeSelect.addEventListener('change', toggleNoticeFields);
+    targetTypeSelect.addEventListener('change', onTargetTypeChange);
+    warningLevelSelect.addEventListener('change', updatePreviews);
+    paymentStatusSelect.addEventListener('change', updatePreviews);
+
+    const citizensRef = ref(db, 'aroundTown/citizens');
+    onValue(citizensRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            rawCitizens = Object.values(data);
+        } else {
+            rawCitizens = [];
+        }
+        populateTargetNames();
+        updatePreviews();
+    });
+
+    const rulesRef = ref(db, 'aroundTown/rules');
+    onValue(rulesRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            rawRules = Object.values(data);
+        } else {
+            rawRules = [];
+        }
+        populateRules();
+    });
+
+    const historyRef = ref(db, 'hospital_notices');
+    onValue(historyRef, (snapshot) => {
+        const data = snapshot.val();
+        if (data) {
+            historyData = Object.keys(data).map(key => ({
+                id: key,
+                ...data[key]
+            })).reverse();
+        } else {
+            historyData = [];
+        }
+        updateHistoryCount();
+        if (document.getElementById('tabHistory').classList.contains('active')) {
+            renderHistory();
+        }
+    });
+
+    function saveToFirebase() {
+        const newRecordRef = ref(db, 'hospital_notices/' + Date.now());
+        const record = {
+            discordText: previewDiscord.textContent,
+            timestamp: Date.now()
+        };
+        set(newRecordRef, record).catch((error) => {
+            console.error("Error saving to Firebase: ", error);
+        });
+    }
+
+    function updateHistoryCount() {
+        document.getElementById('historyCount').textContent = historyData.length;
+    }
+
+    function renderHistory() {
+        const historyList = document.getElementById('historyList');
+        if (historyData.length === 0) {
+            historyList.innerHTML = `<div class="empty-history">ยังไม่มีประวัติการประกาศ</div>`;
+            return;
+        }
+
+        historyList.innerHTML = historyData.map((item, index) => `
+            <div class="history-item">
+                <div class="history-content">${item.discordText}</div>
+                <div class="history-footer">
+                    <span style="font-size: 11px; color: #71717a;">รายการที่ #${historyData.length - index}</span>
+                    <button class="btn-action" style="width: auto; padding: 6px 12px; font-size: 11px; margin-top:0;" onclick="copyHistoryItem('${item.id}')">📋 คัดลอกข้อความนี้</button>
+                </div>
+            </div>
+        `).join('');
+    }
+    window.renderHistory = renderHistory;
+
+    window.copyHistoryItem = function(id) {
+        const item = historyData.find(el => el.id === id);
+        if (item) {
+            navigator.clipboard.writeText(item.discordText).then(() => {
+                showToast("คัดลอกข้อความประวัติสำเร็จ!");
+                switchTab('create');
+            });
+        }
+    };
+
+    function clearHistory() {
+        if (confirm('คุณต้องการล้างประวัติทั้งหมดจากฐานข้อมูลใช่หรือไม่?')) {
+            set(historyRef, null).then(() => {
+                showToast("ล้างประวัติสำเร็จ!");
+            });
+        }
+    }
+    window.clearHistory = clearHistory;
+
+    function showToast(message) {
+        const toast = document.getElementById("toast");
+        toast.textContent = message;
+        toast.className = "show";
+        setTimeout(() => { toast.className = ""; }, 1800);
+    }
+
+    function triggerButtonAnimation(button, originalText) {
+        button.classList.add('success');
+        button.innerHTML = '✅ คัดลอกสำเร็จ!';
+        setTimeout(() => {
+            button.classList.remove('success');
+            button.innerHTML = originalText;
+        }, 1200);
+    }
+
+    function copyGameText() {
+        navigator.clipboard.writeText(previewGame.textContent).then(() => {
+            showToast("คัดลอกข้อความในเกมสำเร็จ!");
+            triggerButtonAnimation(btnGame, '📋 คัดลอกข้อความในเกม');
+        });
+    }
+    window.copyGameText = copyGameText;
+
+    function copyDiscordText() {
+        saveToFirebase();
+        navigator.clipboard.writeText(previewDiscord.textContent).then(() => {
+            showToast("คัดลอกข้อความ Discord และบันทึกแล้ว!");
+            triggerButtonAnimation(btnDiscord, '📋 คัดลอกข้อความ Discord');
+        });
+    }
+    window.copyDiscordText = copyDiscordText;
+
+    toggleNoticeFields();
+</script>
+
+</body>
+</html>

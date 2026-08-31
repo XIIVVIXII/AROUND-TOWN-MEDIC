@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบคำสั่งและประกาศ</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-dark: #0b0f19; 
+            --card-bg: #131b2e; 
+            --card-hover: #17223b; 
+            --primary-pink: #ff4775; 
+            --text-main: #f3f4f6; 
+            --text-muted: #9ca3af; 
+            --border-color: #1f293d; 
+            --success-green: #00e676; 
+        }
+        body { font-family: 'Kanit', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 30px 20px; }
+        .main-wrapper { max-width: 1200px; margin: 0 auto; }
+        
+        .section-card { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 24px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box; 
+        }
+
+        .header-box { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+            flex-wrap: wrap; 
+            gap: 20px; 
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+        
+        .section-title { 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            margin: 0 0 5px 0; 
+        }
+        
+        .section-subtitle { 
+            font-size: 0.9rem; 
+            color: var(--text-muted); 
+            margin: 0; 
+        }
+
+        .search-box { 
+            position: relative; 
+            width: 300px; 
+        }
+        
+        .search-box input { 
+            width: 100%; 
+            padding: 12px 18px 12px 42px; 
+            background: var(--bg-dark); 
+            border: 1px solid var(--border-color); 
+            border-radius: 30px; 
+            color: var(--text-main); 
+            font-family: 'Kanit', sans-serif; 
+            font-size: 0.95rem;
+            outline: none; 
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        
+        .search-box input:focus { 
+            border-color: var(--primary-pink); 
+        }
+        
+        .search-box::before { 
+            content: '🔍'; 
+            position: absolute; 
+            left: 16px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            font-size: 0.9rem; 
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 20px;
+        }
+
+        .announcement-card {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+        }
+
+        .announcement-card:hover {
+            border-color: rgba(255, 71, 117, 0.4);
+            transform: translateY(-3px);
+        }
+
+        .ann-title {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--text-main);
+            margin-bottom: 8px;
+        }
+
+        .ann-text {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 15px;
+            word-break: break-all;
+            white-space: pre-line;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .copy-btn {
+            background: rgba(255, 71, 117, 0.15);
+            color: var(--primary-pink);
+            border: 1px solid rgba(255, 71, 117, 0.3);
+            padding: 10px;
+            border-radius: 10px;
+            font-family: 'Kanit', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.2s;
+            text-align: center;
+        }
+
+        .copy-btn:hover {
+            background: var(--primary-pink);
+            color: white;
+        }
+
+        .copy-btn.copied {
+            background: rgba(0, 230, 118, 0.2);
+            color: var(--success-green);
+            border-color: rgba(0, 230, 118, 0.4);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="section-card">
+            <div class="header-box">
+                <div>
+                    <div class="section-title">ระบบจัดการคำสั่งและประกาศ</div>
+                    <div class="section-subtitle"> พิมพ์ค้นหาหรือคลิกปุ่มเพื่อคัดลอกข้อความประกาศใช้งาน </div>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="searchInput" placeholder="พิมพ์เพื่อค้นหา..." oninput="renderAnnouncements()">
+                </div>
+            </div>
+
+            <div class="grid-container" id="announcementGrid"></div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
+            authDomain: "around-town-armd-684f7.firebaseapp.com",
+            databaseURL: "https://around-town-armd-684f7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "around-town-armd-684f7",
+            storageBucket: "around-town-armd-684f7.firebasestorage.app",
+            messagingSenderId: "176321996941",
+            appId: "1:176321996941:web:f697ff48100754a4bb9ac4",
+            measurementId: "G-YV720SHKR0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        let announcements = [];
+
+        window.renderAnnouncements = function() {
+            const grid = document.getElementById('announcementGrid');
+            const searchInput = document.getElementById('searchInput');
+            if (!grid || !searchInput) return;
+
+            const searchVal = searchInput.value.toLowerCase().trim();
+            grid.innerHTML = "";
+
+            const filtered = announcements.filter(item => {
+                if (!item) return false;
+                const title = (item.name || "").toLowerCase();
+                const text = (item.desc || "").toLowerCase();
+                return title.includes(searchVal) || text.includes(searchVal);
+            });
+
+            if (filtered.length === 0) {
+                grid.innerHTML = `<div style="grid-column: 1 / -1; text-align: center; color: var(--text-muted); padding: 40px;">ไม่พบข้อมูลที่ค้นหา</div>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                const title = item.name || "-";
+                const text = item.desc || "-";
+                grid.innerHTML += `
+                    <div class="announcement-card">
+                        <div>
+                            <div class="ann-title">${title}</div>
+                            <div class="ann-text">${text}</div>
+                        </div>
+                        <button class="copy-btn" onclick="copyText(this, \`${text.replace(/`/g, '\\`')}\`)">📋 คัดลอกข้อความ</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.copyText = function(button, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                let originalText = button.innerText;
+                button.innerText = "Copied! คัดลอกแล้ว";
+                button.classList.add("copied");
+                setTimeout(() => {
+                    button.innerText = originalText;
+                    button.classList.remove("copied");
+                }, 2000);
+            });
+        }
+
+        // --- ดึงข้อมูลจากโหนด commands แบบ Real-time ---
+        onValue(ref(db, 'aroundTown/commands'), (snapshot) => {
+            const data = snapshot.val() || [];
+            if (Array.isArray(data)) {
+                announcements = data;
+            } else {
+                announcements = Object.values(data);
+            }
+            renderAnnouncements();
+        }, (error) => {
+            console.error("Firebase connection error: ", error);
+        });
+    </script>
+</body>
+</html>

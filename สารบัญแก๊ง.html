@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สารบัญเมือง - แก๊ง ครอบครัว และประชาชน</title>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root { 
+            --bg-dark: #0b0f19; 
+            --card-bg: #131b2e; 
+            --card-hover: #17223b; 
+            --primary-pink: #ff4775; 
+            --text-main: #f3f4f6; 
+            --text-muted: #9ca3af; 
+            --border-color: #1f293d; 
+            --success-green: #00e676; 
+        }
+        body { font-family: 'Kanit', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 30px 20px; }
+        .main-wrapper { max-width: 1350px; margin: 0 auto; }
+        
+        .section-card { 
+            background: var(--card-bg); 
+            padding: 30px; 
+            border-radius: 24px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            box-sizing: border-box; 
+        }
+
+        .directory-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 15px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 10px 22px;
+            border-radius: 12px;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover {
+            border-color: var(--primary-pink);
+            color: var(--text-main);
+        }
+
+        .tab-btn.active {
+            background: rgba(255, 71, 117, 0.15);
+            color: var(--primary-pink);
+            border-color: rgba(255, 71, 117, 0.4);
+            font-weight: 500;
+        }
+        
+        .directory-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 30px; 
+            flex-wrap: wrap; 
+            gap: 20px; 
+        }
+        
+        .directory-tag { 
+            background: rgba(255, 71, 117, 0.12); 
+            color: var(--primary-pink); 
+            padding: 5px 14px; 
+            border-radius: 20px; 
+            font-size: 0.8rem; 
+            display: inline-block; 
+            margin-bottom: 8px; 
+            border: 1px solid rgba(255, 71, 117, 0.25);
+            font-weight: 500;
+        }
+        
+        .section-title { 
+            font-size: 1.8rem; 
+            font-weight: 600; 
+            color: var(--text-main); 
+            margin: 0 0 5px 0; 
+        }
+        
+        .section-subtitle { 
+            font-size: 0.9rem; 
+            color: var(--text-muted); 
+            margin: 0; 
+        }
+        
+        .search-box { 
+            position: relative; 
+            width: 320px; 
+        }
+        
+        .search-box input { 
+            width: 100%; 
+            padding: 12px 18px 12px 42px; 
+            background: var(--bg-dark); 
+            border: 1px solid var(--border-color); 
+            border-radius: 30px; 
+            color: var(--text-main); 
+            font-family: 'Kanit', sans-serif; 
+            font-size: 0.95rem;
+            outline: none; 
+            transition: border-color 0.2s, box-shadow 0.2s; 
+            box-sizing: border-box;
+        }
+        
+        .search-box input:focus { 
+            border-color: var(--primary-pink); 
+            box-shadow: 0 0 10px rgba(255, 71, 117, 0.2);
+        }
+        
+        .search-box::before { 
+            content: '🔍'; 
+            position: absolute; 
+            left: 16px; 
+            top: 50%; 
+            transform: translateY(-50%); 
+            font-size: 0.9rem; 
+        }
+        
+        .table-responsive { 
+            width: 100%; 
+            overflow-x: auto; 
+        }
+        
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            text-align: left; 
+        }
+        
+        th { 
+            background-color: transparent; 
+            color: var(--text-muted); 
+            font-weight: 500;
+            font-size: 0.95rem;
+            padding: 16px 20px; 
+            border-bottom: 1px solid var(--border-color); 
+        }
+        
+        td { 
+            padding: 18px 20px; 
+            border-bottom: 1px solid var(--border-color); 
+            font-size: 0.95rem;
+            vertical-align: middle;
+        }
+        
+        tr:hover td { 
+            background-color: var(--card-hover); 
+        }
+        
+        .status-badge { 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            background: rgba(0, 230, 118, 0.08);
+            color: var(--success-green);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            border: 1px solid rgba(0, 230, 118, 0.2);
+            white-space: nowrap;
+        }
+        
+        .status-dot { 
+            width: 7px; 
+            height: 7px; 
+            background-color: var(--success-green); 
+            border-radius: 50%; 
+            box-shadow: 0 0 8px var(--success-green);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-wrapper">
+        <div class="section-card">
+            <div class="directory-tabs">
+                <button class="tab-btn active" onclick="switchCategory('gang', event)">🛡️ รายชื่อแก๊ง</button>
+                <button class="tab-btn" onclick="switchCategory('family', event)">🏡 รายชื่อครอบครัว</button>
+                <button class="tab-btn" onclick="switchCategory('citizen', event)">👤 รายชื่อประชาชน</button>
+            </div>
+
+            <div class="directory-header">
+                <div>
+                    <span class="directory-tag" id="currentTag"> </span>
+                    <div class="section-title" id="currentTitle">รายชื่อแก๊งทั้งหมด</div>
+                    <div class="section-subtitle" id="currentSubtitle"> </div>
+                </div>
+                <div class="search-box">
+                    <input type="text" id="dirSearchInput" placeholder="ค้นหาชื่อ..." oninput="renderDirectory()">
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 70%;">ชื่อ - สกุล </th>
+                            <th style="width: 30%;">สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="directoryTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
+            authDomain: "around-town-armd-684f7.firebaseapp.com",
+            databaseURL: "https://around-town-armd-684f7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "around-town-armd-684f7",
+            storageBucket: "around-town-armd-684f7.firebasestorage.app",
+            messagingSenderId: "176321996941",
+            appId: "1:176321996941:web:f697ff48100754a4bb9ac4",
+            measurementId: "G-YV720SHKR0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const categoryMeta = {
+            gang: {
+                tag: " ",
+                title: "รายชื่อแก๊งทั้งหมด",
+                subtitle: " ",
+                typeKey: "แก๊ง"
+            },
+            family: {
+                tag: " ",
+                title: "รายชื่อครอบครัวทั้งหมด",
+                subtitle: " ",
+                typeKey: "ครอบครัว"
+            },
+            citizen: {
+                tag: " ",
+                title: "รายชื่อประชาชนทั่วไป",
+                subtitle: " ",
+                typeKey: "ประชาชน"
+            }
+        };
+
+        let allCitizens = [];
+        let currentCategory = 'gang';
+
+        window.switchCategory = function(cat, event) {
+            currentCategory = cat;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            const info = categoryMeta[cat];
+            document.getElementById('currentTag').innerText = info.tag;
+            document.getElementById('currentTitle').innerText = info.title;
+            document.getElementById('currentSubtitle').innerText = info.subtitle;
+            document.getElementById('dirSearchInput').value = '';
+
+            renderDirectory();
+        }
+
+        function isThai(char) {
+            const code = char.charCodeAt(0);
+            return code >= 3585 && code <= 3675;
+        }
+
+        function customNameSort(nameA, nameB) {
+            let a = (nameA || "").trim();
+            let b = (nameB || "").trim();
+            let charA = a.charAt(0);
+            let charB = b.charAt(0);
+
+            let isThaiA = isThai(charA);
+            let isThaiB = isThai(charB);
+
+            if (isThaiA && !isThaiB) return -1;
+            if (!isThaiA && isThaiB) return 1;
+
+            return a.localeCompare(b, 'th', { numeric: true, sensitivity: 'base' });
+        }
+
+        window.renderDirectory = function() {
+            const tbody = document.getElementById('directoryTableBody');
+            const searchInput = document.getElementById('dirSearchInput');
+            if (!tbody || !searchInput) return;
+
+            const searchVal = searchInput.value.toLowerCase();
+            tbody.innerHTML = "";
+
+            const targetType = categoryMeta[currentCategory].typeKey;
+            
+            // กรองข้อมูลจาก allCitizens ตาม type ที่ตรงกับแท็บปัจจุบัน
+            let filteredByType = allCitizens.filter(item => item && item.type === targetType);
+            let sorted = [...filteredByType];
+
+            sorted.sort((a, b) => customNameSort(a.name, b.name));
+
+            let filtered = sorted.filter(item => (item.name || "").toLowerCase().includes(searchVal));
+
+            if(filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="2" style="text-align: center; color: var(--text-muted); padding: 30px;">ไม่พบข้อมูลที่ค้นหา</td></tr>`;
+                return;
+            }
+
+            filtered.forEach(item => {
+                tbody.innerHTML += `<tr>
+                    <td><b>${item.name || '-'}</b></td>
+                    <td><div class="status-badge"><span class="status-dot"></span>${item.status || 'ปกติ'}</div></td>
+                </tr>`;
+            });
+        }
+
+        // --- โหลดข้อมูลแบบ Real-time จาก Firebase โหนด citizens ---
+        onValue(ref(db, 'aroundTown/citizens'), (snapshot) => {
+            const data = snapshot.val() || [];
+            if (Array.isArray(data)) {
+                allCitizens = data;
+            } else {
+                allCitizens = Object.values(data);
+            }
+            renderDirectory();
+        }, (error) => {
+            console.error("Firebase connection error: ", error);
+        });
+    </script>
+</body>
+</html>
