@@ -490,9 +490,13 @@
             prefix = `${type} : ${displayTarget}`;
         }
 
-        const gameText = `ประกาศออกจากพื้นที่โรงพยาบาล ${prefix} ออกจากพื้นที่โรงพยาบาลภายใน ระยะเวลา ${duration} นาที เริ่มตั้งแต่เวลา ${startTimeStr} ถึง ${endTimeStr} ขอบคุณครับ/ค่ะ`;
-        const discordText = `# ประกาศออกจากพื้นที่โรงพยาบาล \n\`\`\`\nประกาศออกจากพื้นที่โรงพยาบาล  ${prefix} ออกจากพื้นที่โรงพยาบาลภายใน ระยะเวลา ${duration} นาที เริ่มตั้งแต่เวลา ${startTimeStr} ถึง ${endTimeStr} ขอบคุณครับ/ค่ะ\n\`\`\`\n<@&1473606329536090258>`;
+        // สมมติว่า startTimeStr และ endTimeStr อาจจะติดช่องว่างมา ให้ใช้ .replace(/\s*:\s*/g, ':') เพื่อความชัวร์
+const cleanStart = startTimeStr.replace(/\s*:\s*/g, ':');
+const cleanEnd = endTimeStr.replace(/\s*:\s*/g, ':');
 
+const gameText = `ประกาศออกจากพื้นที่โรงพยาบาล ${prefix} ออกจากพื้นที่โรงพยาบาลภายใน ระยะเวลา ${duration} นาที เริ่มตั้งแต่เวลา ${cleanStart} ถึง ${cleanEnd} ขอบคุณครับ/ค่ะ`;
+
+const discordText = `# ประกาศออกจากพื้นที่โรงพยาบาล \n\`\`\`\nประกาศออกจากพื้นที่โรงพยาบาล  ${prefix} ออกจากพื้นที่โรงพยาบาลภายใน ระยะเวลา ${duration} นาที เริ่มตั้งแต่เวลา ${cleanStart} ถึง ${cleanEnd} ขอบคุณครับ/ค่ะ\n\`\`\`\n<@&1473606329536090258>`;
         const gamePreview = document.getElementById('gamePreview');
         const discordPreview = document.getElementById('discordPreview');
 
