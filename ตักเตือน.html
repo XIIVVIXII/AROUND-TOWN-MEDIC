@@ -569,7 +569,7 @@
         else if (noticeType === 'Blacklist') {
             if (status === 'ชำระแล้ว') {
                 previewGame.textContent = `โรงพยาบาล Around Town ทำการปลด Blacklist ${targetDisplayGame} เนื่องจากจ่ายค่าปรับเรียบร้อยแล้วค่ะ/ครับ`;
-                previewDiscord.textContent = `#  ⛔  __ BLACKLIST __  ⛔\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nหัวข้อ : BLACKLIST ข้อที่ ${blClause} เนื่องจาก  ${reason}\n( เมื่อเวลา ${timeStr} วันที่ ${dateStr} )\nค่าปรับ : ${formattedAmount}\n+สถานะ : ชำระแล้ว\n\`\`\`\n<@&1473606329536090258>`;
+                previewDiscord.textContent = `#  ⛔  __ ปลด BLACKLIST __  ⛔\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nหัวข้อ : BLACKLIST ข้อที่ ${blClause} เนื่องจาก  ${reason}\n( เมื่อเวลา ${timeStr} วันที่ ${dateStr} )\nค่าปรับ : ${formattedAmount}\n+สถานะ : ชำระแล้ว\n\`\`\`\n<@&1473606329536090258>`;
             } else {
                 previewGame.textContent = `โรงพยาบาล Around Town ทำการ Blacklist ${targetDisplayGame} เนื่องจาก ${reason} ขอบคุณค่ะ/ครับ`;
                 previewDiscord.textContent = `#  ⛔  __ BLACKLIST __  ⛔\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nหัวข้อ : BLACKLIST ข้อที่ ${blClause} เนื่องจาก  ${reason}\n( เมื่อเวลา ${timeStr} วันที่ ${dateStr} )\nค่าปรับ : ${formattedAmount}\n-สถานะ : ยังไม่ชำระ\n\`\`\`\n<@&1473606329536090258>`;
