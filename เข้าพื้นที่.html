@@ -87,13 +87,6 @@
             box-shadow: inset 0 2px 4px rgba(0,0,0,0.5), 0 0 12px rgba(244, 63, 94, 0.25);
         }
 
-        .form-group input[readonly] {
-            background-color: #121216;
-            color: #10b981;
-            font-weight: 600;
-            cursor: not-allowed;
-        }
-
         .dropdown-list {
             position: absolute;
             top: calc(100% + 4px);
@@ -223,15 +216,15 @@
         <div class="form-card">
             <!-- ช่องที่ 1: ค้นหารหัส / หมายเลขสถานที่ -->
             <div class="form-group">
-                <label for="numberInput">หมายเลขสถานที่ </label>
+                <label for="numberInput">หมายเลขสถานที่</label>
                 <input type="text" id="numberInput" placeholder="พิมพ์ตัวเลข เช่น 1, 2..." autocomplete="off" oninput="onNumberInput()" onfocus="showDropdown()">
                 <div id="dropdownList" class="dropdown-list"></div>
             </div>
 
-            <!-- ช่องที่ 2: ชื่อสถานที่ (แสดงอัตโนมัติ) -->
+            <!-- ช่องที่ 2: ชื่อสถานที่ (ปรับให้พิมพ์แก้ไขเองได้แล้ว) -->
             <div class="form-group">
-                <label for="locationNameInput"> ชื่อสถานที่ </label>
-                <input type="text" id="locationNameInput" placeholder="ชื่อสถานที่..." readonly>
+                <label for="locationNameInput">ชื่อสถานที่</label>
+                <input type="text" id="locationNameInput" placeholder="ชื่อสถานที่..." autocomplete="off" oninput="updatePreview()">
             </div>
 
             <div>
@@ -305,11 +298,11 @@
                 return parsed.num === keyword;
             });
 
-            if (found) {
+            if (keyword === "") {
+                locationNameInput.value = '';
+            } else if (found) {
                 const parsed = parseLocationItem(found.name);
                 locationNameInput.value = parsed.name;
-            } else {
-                locationNameInput.value = '';
             }
             updatePreview();
         }
@@ -356,10 +349,10 @@
             
             const hours = String(now.getHours()).padStart(2, '0');
             const minutes = String(now.getMinutes()).padStart(2, '0');
-            return `${hours}:${minutes}`; // ปรับให้ชิดกันไม่มีช่องว่าง
+            return `${hours}:${minutes}`;
         }
 
-        function updatePreview() {
+        window.updatePreview = function() {
             const loc = locationNameInput.value.trim() || '.....';
             const timeStr = getTargetTime();
             previewBox.textContent = `ขณะนี้หมอกำลังจะทำการเข้าพื้นที่สตอรี่ บริเวณ ${loc} ขอให้ผู้ที่อยู่ในพื้นที่ ที่มีสตอรี่ออกจากพื้นที่ก่อนเวลา ${timeStr} น. ขอบคุณค่ะ/ครับ`;
