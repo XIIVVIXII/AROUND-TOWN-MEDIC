@@ -43,6 +43,61 @@
         .btn-delete:hover { opacity: 0.8; }
         .citizen-sections-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
         @media (max-width: 1024px) { .citizen-sections-grid { grid-template-columns: 1fr; } }
+        /* --- เพิ่มเติมส่วนแต่งป้ายกำกับและปุ่มเปลี่ยนชื่อสำหรับกฎระเบียบ --- */
+        .group-header .group-action-btn,
+        .subgroup-header .group-action-btn {
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            transform: scale(0.9);
+        }
+
+        .group-header:hover .group-action-btn,
+        .subgroup-header:hover .group-action-btn {
+            opacity: 1;
+            visibility: visible;
+            transform: scale(1);
+        }
+
+        .btn-cute {
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: #d11a2a;
+            border: none;
+            border-radius: 20px;
+            padding: 4px 14px;
+            font-size: 0.85em;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(255, 154, 158, 0.4);
+            transition: all 0.2s ease;
+            font-family: 'Kanit', sans-serif;
+        }
+
+        .btn-cute:hover {
+            box-shadow: 0 4px 8px rgba(255, 154, 158, 0.6);
+            transform: translateY(-2px) scale(1.05) !important;
+        }
+
+       /* สไตล์ป้ายหมวดหมู่และหัวข้อ ให้เข้ากับธีมหลัก (Dark & Red Neon) */
+.badge-cute-cyan, .badge-cute-gold {
+    background: rgba(255, 51, 102, 0.15); /* ใช้พื้นหลังโทนแดงจางๆ */
+    color: #ff3366; /* สีตัวหนังสือแดงสว่างเข้ากับธีม */
+    border: 1px solid rgba(255, 51, 102, 0.4); /* ขอบเรืองแสงเบาๆ */
+    padding: 3px 10px;
+    border-radius: 6px;
+    font-weight: 600;
+    font-size: 0.95em;
+    display: inline-block;
+    box-shadow: 0 0 8px rgba(255, 51, 102, 0.2);
+}
+
+.badge-cute-gold {
+    background: rgba(255, 153, 0, 0.15); /* หัวข้อปรับเป็นโทนส้มทองเข้มข้นขึ้นเล็กน้อย */
+    color: #ffaa00;
+    border: 1px solid rgba(255, 153, 0, 0.4);
+    box-shadow: 0 0 8px rgba(255, 153, 0, 0.2);
+}
+        
     </style>
 </head>
 <body>
@@ -233,47 +288,58 @@
         </div>
 
         <!-- 4. เพิ่มกฎ / ค่าปรับ -->
-        <div id="tabRules" class="tab-content">
-            <div class="section-card">
-                <div class="section-title" id="ruleFormTitle">➕ เพิ่มกฎ / ค่าปรับ</div>
-                <form id="ruleForm">
-                    <input type="hidden" id="ruleEditIndex" value="-1">
-                    <div class="form-grid" style="grid-template-columns: 1fr 2fr 1fr;">
-                        <div class="form-group">
-                            <label>ข้อที่</label>
-                            <input type="text" id="ruleNo" class="form-control" placeholder="เช่น 1 หรือ 1.1" required>
-                        </div>
-                        <div class="form-group">
-                            <label>ข้อหา</label>
-                            <input type="text" id="ruleName" class="form-control" placeholder="เช่น ฝ่าไฟแดง" required>
-                        </div>
-                        <div class="form-group">
-                            <label>ค่าปรับ</label>
-                            <input type="text" id="ruleFine" class="form-control" placeholder="เช่น 5,000 หรือ - (ตักเตือน)" required>
-                        </div>
-                    </div>
-                    <button type="submit" id="ruleSubmitBtn" class="btn-submit">บันทึกข้อมูล</button>
-                </form>
-            </div>
-            <div class="section-card">
-                <div class="section-title">📋 รายการกฎและค่าปรับทั้งหมด</div>
-                <div class="table-responsive">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 15%;">ข้อที่</th>
-                                <th style="width: 50%;">ข้อหา</th>
-                                <th style="width: 20%;">ค่าปรับ</th>
-                                <th style="width: 15%;">จัดการ</th>
-                            </tr>
-                        </thead>
-                        <tbody id="ruleTableBody"></tbody>
-                    </table>
+<div id="tabRules" class="tab-content">
+    <div class="section-card">
+        <div class="section-title" id="ruleFormTitle">➕ เพิ่มกฎ / ค่าปรับ</div>
+        <form id="ruleForm">
+            <input type="hidden" id="ruleEditIndex" value="-1">
+            <div class="form-grid" style="grid-template-columns: 1fr 1fr 1fr;">
+                <div class="form-group">
+                    <label>หมวดหมู่</label>
+                    <input type="text" id="ruleCategory" class="form-control" list="categoryList" placeholder="พิมพ์หรือเลือกหมวดหมู่..." required>
+                    <datalist id="categoryList"></datalist>
+                </div>
+                <div class="form-group">
+                    <label>หัวข้อ</label>
+                    <input type="text" id="ruleTopic" class="form-control" list="topicList" placeholder="เช่น ฝ่าไฟแดง" required>
+                    <datalist id="topicList"></datalist>
+                </div>
+                <div class="form-group">
+                    <label>ข้อที่</label>
+                    <input type="text" id="ruleNo" class="form-control" placeholder="เช่น 1 หรือ 1.1" required>
+                </div>
+                <div class="form-group" style="grid-column: span 2;">
+                    <label>รายละเอียด / ข้อหา</label>
+                    <input type="text" id="ruleName" class="form-control" placeholder="ระบุรายละเอียด..." required>
+                </div>
+                <div class="form-group">
+                    <label>ค่าปรับ</label>
+                    <input type="text" id="ruleFine" class="form-control" placeholder="เช่น 5,000 หรือ - (ตักเตือน)">
                 </div>
             </div>
+            <button type="submit" id="ruleSubmitBtn" class="btn-submit">บันทึกข้อมูล</button>
+        </form>
+    </div>
+        <!-- ตารางแสดงรายการกฎและค่าปรับ  -->
+    <div class="section-card">
+        <div class="section-title">📋 รายการกฎและค่าปรับทั้งหมด</div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 15%;">ข้อที่</th>
+                        <th style="width: 50%;">หัวข้อ / รายละเอียด</th>
+                        <th style="width: 20%;">ค่าปรับ</th>
+                        <th style="width: 15%;">จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody id="ruleTableBody"></tbody>
+            </table>
         </div>
+    </div>
+</div>
 
-        <!-- 5. เพิ่มบริเวณ / สถานที่ -->
+    <!-- 5. เพิ่มบริเวณ / สถานที่ -->
         <div id="tabLocations" class="tab-content">
             <div class="section-card">
                 <div class="section-title" id="locFormTitle">➕ เพิ่มบริเวณ / สถานที่</div>
@@ -303,6 +369,7 @@
         </div>
 
     </div>
+
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
@@ -605,72 +672,223 @@
             saveDataToFirebase(); 
         }
 
-        // --- 4. จัดการกฎ / ค่าปรับ ---
-        window.renderRules = function(filterQuery = "") {
-            const tbody = document.getElementById('ruleTableBody');
-            if (!tbody) return;
-            tbody.innerHTML = "";
+// --- 4. จัดการกฎ / ค่าปรับ ---
+        let collapsedState = {};
 
-            let filtered = rulesData.filter(rule => {
-                if (!filterQuery) return true;
-                return (rule.no && rule.no.toLowerCase().includes(filterQuery)) || 
-                       rule.name.toLowerCase().includes(filterQuery) || 
-                       (rule.fine && rule.fine.toLowerCase().includes(filterQuery));
-            });
+        function formatFineInput(value) {
+            if (!value) return '';
+            let cleanNum = value.replace(/[^0-9]/g, '');
+            if (cleanNum === '') return value; 
+            let num = parseInt(cleanNum, 10);
+            return num.toLocaleString(); 
+        }
 
-            filtered.sort((a, b) => (a.no || "").localeCompare(b.no || "", 'th', { numeric: true }));
-
-            filtered.forEach((rule) => {
-                const realIndex = rulesData.indexOf(rule);
-                tbody.innerHTML += `<tr>
-                    <td><b>${rule.no || '-'}</b></td>
-                    <td><b>${rule.name}</b></td>
-                    <td><span style="color: var(--primary-pink); font-weight: 500;">${rule.fine || '-'}</span></td>
-                    <td>
-                        <div class="action-btns">
-                            <button type="button" class="btn-edit" onclick="editRule(${realIndex})">แก้ไข</button>
-                            <button type="button" class="btn-delete" onclick="deleteRule(${realIndex})">ลบ</button>
-                        </div>
-                    </td>
-                </tr>`;
+        const ruleFineInputElem = document.getElementById('ruleFine');
+        if (ruleFineInputElem) {
+            ruleFineInputElem.addEventListener('blur', function() {
+                this.value = formatFineInput(this.value);
             });
         }
 
-        document.getElementById('ruleForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const editIndex = parseInt(document.getElementById('ruleEditIndex').value);
-            const ruleObj = { 
-                no: document.getElementById('ruleNo').value, 
-                name: document.getElementById('ruleName').value, 
-                fine: document.getElementById('ruleFine').value 
-            };
-            if (editIndex === -1) {
-                rulesData.push(ruleObj);
-            } else {
-                rulesData[editIndex] = ruleObj;
-                document.getElementById('ruleEditIndex').value = -1;
-                document.getElementById('ruleFormTitle').innerText = "➕ เพิ่มกฎ / ค่าปรับ";
-                document.getElementById('ruleSubmitBtn').innerText = "บันทึกข้อมูล";
+        function highlightKeywords(text) {
+            if (!text) return '';
+            const regex = /(แบล็คลิส|blacklist)/gi;
+            return text.replace(regex, '<span style="color: #ff3366; font-weight: bold;">$&</span>');
+        }
+
+        function updateRuleDatalists() {
+            const categories = [...new Set(rulesData.map(item => item.category).filter(Boolean))];
+            const topics = [...new Set(rulesData.map(item => item.topic).filter(Boolean))];
+
+            const catList = document.getElementById('categoryList');
+            const topList = document.getElementById('topicList');
+            if (catList) catList.innerHTML = categories.map(c => `<option value="${c}">`).join('');
+            if (topList) topList.innerHTML = topics.map(t => `<option value="${t}">`).join('');
+        }
+
+        window.toggleGroup = function(key) {
+            collapsedState[key] = !collapsedState[key];
+            renderRules();
+        }
+
+        window.renameCategory = function(oldCategory) {
+            const newCategory = prompt(`เปลี่ยนชื่อหมวดหมู่ "${oldCategory}" เป็น:`, oldCategory);
+            if (newCategory && newCategory.trim() !== "" && newCategory !== oldCategory) {
+                rulesData.forEach(item => {
+                    if (item.category === oldCategory) {
+                        item.category = newCategory.trim();
+                    }
+                });
+                updateRuleDatalists();
+                saveDataToFirebase();
             }
-            saveDataToFirebase();
-            this.reset();
-        });
+        }
+
+        window.renameTopic = function(category, oldTopic) {
+            const newTopic = prompt(`เปลี่ยนชื่อหัวข้อ "${oldTopic}" ในหมวดหมู่ "${category}" เป็น:`, oldTopic);
+            if (newTopic && newTopic.trim() !== "" && newTopic !== oldTopic) {
+                rulesData.forEach(item => {
+                    if (item.category === category && item.topic === oldTopic) {
+                        item.topic = newTopic.trim();
+                    }
+                });
+                updateRuleDatalists();
+                saveDataToFirebase();
+            }
+        }
+
+window.renderRules = function(filterQuery = "") {
+    const tbody = document.getElementById('ruleTableBody');
+    if (!tbody) return;
+    tbody.innerHTML = "";
+
+    updateRuleDatalists();
+
+    const searchTerm = filterQuery ? filterQuery.toLowerCase() : '';
+    let filtered = rulesData.map((item, originalIndex) => ({ ...item, originalIndex })).filter(item => {
+        if (!searchTerm) return true;
+        return (item.category && item.category.toLowerCase().includes(searchTerm)) ||
+               (item.topic && item.topic.toLowerCase().includes(searchTerm)) ||
+               (item.ruleNo && item.ruleNo.toString().toLowerCase().includes(searchTerm)) ||
+               (item.name && item.name.toLowerCase().includes(searchTerm)) ||
+               (item.fine && item.fine.toLowerCase().includes(searchTerm));
+    });
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">ไม่พบข้อมูลกฎระเบียบที่ค้นหา</td></tr>`;
+        return;
+    }
+
+    const grouped = {};
+    filtered.forEach(item => {
+        const cat = item.category || 'อื่นๆ';
+        const top = item.topic || 'ทั่วไป';
+        if (!grouped[cat]) grouped[cat] = {};
+        if (!grouped[cat][top]) grouped[cat][top] = [];
+        grouped[cat][top].push(item);
+    });
+
+    for (const cat in grouped) {
+        for (const top in grouped[cat]) {
+            grouped[cat][top].sort((a, b) => {
+                return String(a.ruleNo || '').localeCompare(String(b.ruleNo || ''), undefined, { numeric: true });
+            });
+        }
+    }
+
+    let html = '';
+    for (const cat in grouped) {
+        const catKey = 'cat_' + cat;
+        const isCatCollapsed = collapsedState[catKey] || false;
+        const catArrow = isCatCollapsed ? '▶' : '▼';
+
+        // เพิ่มแถบไฮไลท์สีชมพู/แดงด้านซ้าย (border-left) ให้กับแถวหมวดหมู่
+        html += `<tr class="group-header" style="border-left: 4px solid var(--primary-pink, #ff3366);">
+                    <td colspan="3" onclick="toggleGroup('${catKey}')" style="cursor: pointer;">
+                        <span class="toggle-icon">${catArrow}</span> 
+                        <span class="badge-cute-cyan">📁 หมวดหมู่: ${highlightKeywords(cat)}</span>
+                    </td>
+                    <td style="text-align: right;">
+                        <button type="button" class="btn-cute group-action-btn" onclick="renameCategory('${cat}'); event.stopPropagation();">✨ เปลี่ยนชื่อ</button>
+                    </td>
+                 </tr>`;
+
+        if (!isCatCollapsed) {
+            for (const top in grouped[cat]) {
+                const topKey = 'top_' + cat + '_' + top;
+                const isTopCollapsed = collapsedState[topKey] || false;
+                const topArrow = isTopCollapsed ? '▶' : '▼';
+                let count = grouped[cat][top].length;
+
+                // เพิ่มแถบไฮไลท์สีฟ้าด้านซ้าย (border-left) ให้กับแถวหัวข้อ
+                html += `<tr class="subgroup-header" style="border-left: 4px solid #38bdf8;">
+                            <td colspan="3" style="padding-left: 25px; cursor: pointer;" onclick="toggleGroup('${topKey}')">
+                                <span class="toggle-icon">${topArrow}</span> 
+                                <span class="badge-cute-gold">📂 หัวข้อ: ${highlightKeywords(top)}</span> 
+                                <span style="color: #aaa; font-size: 0.9em;">(${count} ข้อ)</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <button type="button" class="btn-cute group-action-btn" onclick="renameTopic('${cat}', '${top}'); event.stopPropagation();">✨ เปลี่ยนชื่อ</button>
+                            </td>
+                         </tr>`;
+
+                if (!isTopCollapsed) {
+                    grouped[cat][top].forEach(item => {
+                        html += `
+                            <tr>
+                                <td style="padding-left: 45px;"><b>ข้อ ${item.ruleNo || '-'}</b></td>
+                                <td><b>${highlightKeywords(item.name || '')}</b></td>
+                                <td><span style="color: var(--primary-pink); font-weight: 500;">${highlightKeywords(item.fine || '-')}</span></td>
+                                <td>
+                                    <div class="action-btns">
+                                        <button type="button" class="btn-edit" onclick="editRule(${item.originalIndex}); event.stopPropagation();">แก้ไข</button>
+                                        <button type="button" class="btn-delete" onclick="deleteRule(${item.originalIndex}); event.stopPropagation();">ลบ</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            }
+        }
+    }
+    tbody.innerHTML = html;
+}
+
+        const ruleFormElem = document.getElementById('ruleForm');
+        if (ruleFormElem) {
+            ruleFormElem.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const editIndex = parseInt(document.getElementById('ruleEditIndex').value);
+                
+                let ruleFineVal = document.getElementById('ruleFine').value.trim();
+                if (ruleFineVal) {
+                    ruleFineVal = formatFineInput(ruleFineVal); // จัดรูปแบบเฉพาะตัวเลขและคอมมาโดยไม่มีคำว่าบาท
+                }
+
+                const ruleObj = { 
+                    category: document.getElementById('ruleCategory') ? document.getElementById('ruleCategory').value.trim() : '',
+                    topic: document.getElementById('ruleTopic') ? document.getElementById('ruleTopic').value.trim() : '',
+                    ruleNo: document.getElementById('ruleNo').value.trim(), 
+                    name: document.getElementById('ruleName').value.trim(), 
+                    fine: ruleFineVal 
+                };
+
+                if (editIndex === -1) {
+                    rulesData.push(ruleObj);
+                } else {
+                    rulesData[editIndex] = ruleObj;
+                    document.getElementById('ruleEditIndex').value = -1;
+                    const formTitle = document.getElementById('ruleFormTitle');
+                    const submitBtn = document.getElementById('ruleSubmitBtn');
+                    if (formTitle) formTitle.innerText = "➕ เพิ่มกฎ / ค่าปรับ";
+                    if (submitBtn) submitBtn.innerText = "บันทึกข้อมูล";
+                }
+                saveDataToFirebase();
+                this.reset();
+            });
+        }
 
         window.editRule = function(index) {
             const rule = rulesData[index];
             document.getElementById('ruleEditIndex').value = index;
-            document.getElementById('ruleNo').value = rule.no || '';
-            document.getElementById('ruleName').value = rule.name;
+            if (document.getElementById('ruleCategory')) document.getElementById('ruleCategory').value = rule.category || '';
+            if (document.getElementById('ruleTopic')) document.getElementById('ruleTopic').value = rule.topic || '';
+            document.getElementById('ruleNo').value = rule.ruleNo || '';
+            document.getElementById('ruleName').value = rule.name || '';
             document.getElementById('ruleFine').value = rule.fine || '';
-            document.getElementById('ruleFormTitle').innerText = "✏️ แก้ไขกฎข้อที่: " + (rule.no || '');
-            document.getElementById('ruleSubmitBtn').innerText = "อัปเดตข้อมูล";
+            
+            const formTitle = document.getElementById('ruleFormTitle');
+            const submitBtn = document.getElementById('ruleSubmitBtn');
+            if (formTitle) formTitle.innerText = "✏️ แก้ไขกฎข้อที่: " + (rule.ruleNo || '');
+            if (submitBtn) submitBtn.innerText = "อัปเดตข้อมูล";
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.deleteRule = function(index) { 
-            rulesData.splice(index, 1); 
-            saveDataToFirebase(); 
-        }
+       window.deleteRule = function(index) { 
+    rulesData.splice(index, 1); 
+    saveDataToFirebase(); 
+}
 
         // --- 5. จัดการบริเวณ / สถานที่ ---
         window.renderLocations = function(filterQuery = "") {
