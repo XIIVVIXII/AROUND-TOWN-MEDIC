@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ระบบประกาศโรงพยาบาล Around Town</title>
     <style>
-        :root {
+:root {
             --bg-color: #121212;
             --card-bg: #1e1e1e;
-            --input-bg: #262626;
+            --input-bg: #000000;
             --border-color: #333333;
             --primary-color: #ff4757;
             --primary-hover: #ff6b81;
@@ -45,7 +45,7 @@
 
         .nav-tabs {
             display: flex;
-            justify-content: center;
+            justify-content: flex-end;
             gap: 10px;
             margin-bottom: 20px;
             border-bottom: 1px solid var(--border-color);
@@ -226,6 +226,51 @@
             color: var(--text-muted);
             padding: 30px;
         }
+
+        #ruleCategorySearch {
+    pointer-events: auto !important;
+    user-select: text !important;
+    -webkit-user-select: text !important;
+}
+
+/* เพิ่มเติมขนาดตัวอักษรและปรับช่องค้นหาหมวดหมู่ให้เป็นสีดำกลมกลืน */
+.form-group label {
+            font-size: 14px !important;
+        }
+        .form-group select, 
+        .form-group input,
+        .form-group textarea {
+            font-size: 20px !important;
+            padding: 10px 12px !important;
+        }
+
+        #ruleCategorySearch {
+            background: var(--input-bg) !important;
+            color: var(--text-color) !important;
+            border: 1px solid var(--border-color) !important;
+            pointer-events: auto !important;
+            user-select: text !important;
+            -webkit-user-select: text !important;
+        }
+
+        #previewGame {
+            font-size: 17px !important; /* ปรับขนาดตรงนี้ให้ใหญ่ขึ้นตามต้องการครับ (เปลี่ยนจาก 13px เป็น 17px) */
+            line-height: 1.5 !important;
+            padding: 12px !important;
+            max-height: none !important; /* ป้องกันการเลื่อนหากต้องการให้ขยายตามข้อความ */
+            height: auto !important;
+        }
+
+        #previewDiscord {
+            font-size: 17px !important;
+            line-height: 1.5 !important;
+            padding: 16px !important;
+            white-space: pre-wrap !important;
+            word-break: break-word !important;
+            max-height: none !important; 
+            height: auto !important;     
+            overflow-y: visible !important; 
+        }
     </style>
 </head>
 <body>
@@ -265,6 +310,17 @@
                     <input type="text" id="targetNameSearch" list="targetNameList" placeholder="พิมพ์ชื่อหรือเลือก...">
                     <datalist id="targetNameList"></datalist>
                 </div>
+
+                <!-- 🌟 เพิ่มตรงนี้ -->
+<div class="form-group" style="margin-bottom: 8px;">
+    <label for="ruleCategorySearch" style="font-size: 12px; color: #a1a1aa; margin-bottom: 4px; display: block;">เลือกหมวดหมู่กฎ:</label>
+    <input type="text" id="ruleCategorySearch" list="ruleCategoryList" placeholder="-- เลือกหรือพิมพ์ค้นหาหมวดหมู่ --" style="width: 100%; padding: 10px 12px; border-radius: 6px; background: var(--input-bg); color: var(--text-color); border: 1px solid var(--border-color); box-sizing: border-box;">
+    <datalist id="ruleCategoryList">
+        <!-- รายการหมวดหมู่จะถูกเติมเข้ามาอัตโนมัติ -->
+    </datalist>
+</div>
+                <!-- สิ้นสุดจุดที่เพิ่ม -->
+
 
                 <div class="form-group" id="groupReason">
                     <label for="fineReasonSearch">ข้อหา / หัวข้อ :</label>
@@ -348,6 +404,10 @@
     const targetNameLabel = document.getElementById('targetNameLabel');
     const targetNameSearch = document.getElementById('targetNameSearch');
     const targetNameList = document.getElementById('targetNameList');
+    
+    // เพิ่มตัวแปรสำหรับช่องค้นหาหมวดหมู่
+    const ruleCategorySearch = document.getElementById('ruleCategorySearch');
+    
     const fineReasonSearch = document.getElementById('fineReasonSearch');
     const fineReasonList = document.getElementById('fineReasonList');
     const fineAmountInput = document.getElementById('fineAmount');
@@ -445,41 +505,51 @@
         });
     }
 
-    function populateRules() {
-        fineReasonList.innerHTML = '';
-        rawRules.forEach(rule => {
+    function populateCategories() {
+        const catList = document.getElementById('ruleCategoryList');
+        if (!catList) return;
+        catList.innerHTML = '';
+        const categories = [...new Set(rawRules.map(r => r.topic || r.category || 'ทั่วไป'))];
+        
+        categories.forEach(cat => {
             const opt = document.createElement('option');
-            const clauseNo = rule.no || '';
+            opt.value = cat;
+            catList.appendChild(opt);
+        });
+    }
+
+    function populateRules() {
+        const selectedCategory = ruleCategorySearch ? ruleCategorySearch.value.trim() : '';
+        fineReasonList.innerHTML = '';
+
+        const filteredRules = selectedCategory 
+            ? rawRules.filter(r => (r.topic || r.category || 'ทั่วไป').toLowerCase().includes(selectedCategory.toLowerCase()))
+            : rawRules;
+
+        filteredRules.forEach(rule => {
+            const opt = document.createElement('option');
+            const clauseNo = rule.ruleNo || rule.no || '1';
             const ruleName = rule.name || '';
+            const ruleTopic = rule.topic || rule.category || 'ทั่วไป';
             const ruleFine = rule.fine || '';
             
-            if (rule.customDisplay) {
-                opt.value = rule.customDisplay;
-            } else {
-                opt.value = clauseNo ? `ข้อ ${clauseNo}: ${ruleName}` : ruleName;
-            }
+            opt.value = `[${ruleTopic}] ข้อ ${clauseNo}: ${ruleName}`;
             
             if (ruleFine) {
-                opt.label = `ค่าปรับ: ${ruleFine}`;
+                opt.label = `[${ruleTopic}] ข้อ ${clauseNo}: ${ruleName} (ค่าปรับ: ${ruleFine})`;
+            } else {
+                opt.label = `[${ruleTopic}] ข้อ ${clauseNo}: ${ruleName}`;
             }
             fineReasonList.appendChild(opt);
         });
     }
 
-    function onReasonInputChange() {
-        const rawRuleInput = fineReasonSearch.value.trim();
-        const matchedRule = rawRules.find(r => {
-            const standardStr = r.no ? `ข้อ ${r.no}: ${r.name}` : r.name;
-            return standardStr === rawRuleInput || r.name === rawRuleInput || (r.customDisplay && r.customDisplay === rawRuleInput);
-        });
-
-        if (matchedRule && matchedRule.fine) {
-            fineAmountInput.value = matchedRule.fine;
-            formatFineInput(fineAmountInput);
-        }
+    function onCategoryChange() {
+        fineReasonSearch.value = ''; 
+        populateRules();
         updatePreviews();
     }
-    window.onReasonInputChange = onReasonInputChange;
+    window.onCategoryChange = onCategoryChange;
 
     function getCurrentTime() {
         const now = new Date();
@@ -497,20 +567,54 @@
     }
 
     function parseSelectedRule(inputStr) {
-        if (!inputStr) return { clause: '1', reason: '.....' };
+        if (!inputStr) return { clause: '1', reason: '.....', topic: 'ทั่วไป', fine: '' };
         
-        const match = inputStr.match(/^ข้อ\s*([^:]+):\s*(.*)$/);
-        if (match) {
-            return { clause: match[1].trim(), reason: match[2].trim() };
-        }
+        const found = rawRules.find(r => {
+            const cNo = r.ruleNo || r.no || '1';
+            const tName = r.name || '';
+            const tTopic = r.topic || r.category || 'ทั่วไป';
+            const possibleValues = [
+                `[${tTopic}] ข้อ ${cNo}: ${tName}`,
+                `[-] ข้อ ${cNo}: ${tName}`,
+                `ข้อ ${cNo}: ${tName}`,
+                tName
+            ];
+            return possibleValues.includes(inputStr) || inputStr.includes(tName);
+        });
         
-        const found = rawRules.find(r => r.name === inputStr || r.no === inputStr || (r.customDisplay && r.customDisplay === inputStr));
         if (found) {
-            return { clause: found.no || '1', reason: found.name || inputStr };
+            return {
+                clause: found.ruleNo || found.no || '1',
+                reason: found.name || inputStr,
+                topic: found.topic || found.category || 'ทั่วไป',
+                fine: found.fine || ''
+            };
         }
-        return { clause: '1', reason: inputStr };
+        
+        const match = inputStr.match(/ข้อ\s*([^:]+):\s*(.*)$/);
+        if (match) {
+            return { 
+                clause: match[1].trim(), 
+                reason: match[2].trim(), 
+                topic: 'ทั่วไป',
+                fine: ''
+            };
+        }
+        
+        return { clause: '1', reason: inputStr, topic: 'ทั่วไป', fine: '' };
     }
 
+    function onReasonInputChange() {
+        const rawRuleInput = fineReasonSearch.value.trim();
+        const parsed = parseSelectedRule(rawRuleInput);
+        
+        if (parsed.fine && fineAmountInput) {
+            fineAmountInput.value = parsed.fine;
+        }
+        updatePreviews();
+    }
+    window.onReasonInputChange = onReasonInputChange;
+        
     function updatePreviews() {
         const noticeType = noticeTypeSelect.value;
         const targetType = targetTypeSelect.value;
@@ -524,16 +628,24 @@
         let rawAmountText = fineAmountInput.value.trim() || '...';
         let formattedAmount = rawAmountText;
         
-        if (formattedAmount.includes('/')) {
-            let parts = formattedAmount.split('/');
-            let numPart = parts[0].trim();
-            let textPart = parts.slice(1).join('/').trim();
+        // จัดการแทรก IC ไว้หลังตัวเลขจำนวนเงินตัวแรก (ก่อนเครื่องหมาย +, -, / หรือข้อความต่อท้าย)
+        let matchAmount = formattedAmount.match(/^([0-9,]+)(\s*[\+\-\/].*|[\s\+].*|.*)$/);
+        
+        // ปรับปรุง Regex ให้รองรับการแยกตัวเลขกับส่วนที่เหลือได้อย่างแม่นยำยิ่งขึ้น
+        let splitMatch = formattedAmount.match(/^([0-9,]+)(.*)$/);
+        if (splitMatch) {
+            let numPart = splitMatch[1].replace(/ic/gi, '').trim();
+            let restPart = splitMatch[2].replace(/ic/gi, '').trim();
             
-            numPart = numPart.replace(/ic/gi, '').trim();
-            textPart = textPart.replace(/ic/gi, '').trim();
-            
-            if (textPart) {
-                formattedAmount = `${numPart} IC / ${textPart}`;
+            // ถ้ามีส่วนที่เหลือ (เช่น +บำเพ็ญ หรือ -บำเพ็ญ หรือ /...) ให้ใส่ IC ไว้ตรงกลาง
+            if (restPart) {
+                // เช็คว่า restPart ขึ้นต้นด้วยเครื่องหมาย + - / หรือไม่ ถ้าใช่ให้ต่อเลย ถ้าไม่ใช่ให้เว้นวรรค
+                let firstChar = restPart.charAt(0);
+                if (['+', '-', '/'].includes(firstChar)) {
+                    formattedAmount = `${numPart} IC ${restPart}`;
+                } else {
+                    formattedAmount = `${numPart} IC ${restPart}`;
+                }
             } else {
                 formattedAmount = `${numPart} IC`;
             }
@@ -564,7 +676,7 @@
 
         if (noticeType === 'ตักเตือน') {
             previewGame.textContent = `โรงพยาบาล Around Town ขอทำการประกาศตักเตือน ${targetDisplayGame} เนื่องจาก ${reason} ${warning} ขอบคุณค่ะ/ครับ`;
-            previewDiscord.textContent = `# ประกาศตักเตือน\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nข้อหา : ${reason}\nตักเตือน : ${warning}\nเวลาประกาศ : ${timeStr}\n\`\`\`\n<@&1473606329536090258>`;
+            previewDiscord.textContent = `# ประกาศตักเตือน\n\n\`\`\`diff\n${discordLabelKey} : ${name}\nข้อหา : ${reason} (ข้อ ${blClause})\nตักเตือน : ${warning}\nเวลาประกาศ : ${timeStr}\n\`\`\`\n<@&1473606329536090258>`;
         } 
         else if (noticeType === 'Blacklist') {
             if (status === 'ชำระแล้ว') {
@@ -577,13 +689,24 @@
         }
     }
 
+    
+    // ผูก Event Listener ให้ช่องค้นหาหมวดหมู่ทำงานได้อย่างราบรื่น
+    if (ruleCategorySearch) {
+        ruleCategorySearch.addEventListener('input', () => {
+            onCategoryChange();
+        });
+        ruleCategorySearch.addEventListener('change', () => {
+            onCategoryChange();
+        });
+    }
+
     targetNameSearch.addEventListener('input', updatePreviews);
     targetNameSearch.addEventListener('change', updatePreviews);
     targetNameSearch.addEventListener('blur', updatePreviews);
 
-    fineReasonSearch.addEventListener('input', () => { onReasonInputChange(); updatePreviews(); });
-    fineReasonSearch.addEventListener('change', () => { onReasonInputChange(); updatePreviews(); });
-    fineReasonSearch.addEventListener('blur', () => { onReasonInputChange(); updatePreviews(); });
+    fineReasonSearch.addEventListener('input', () => { onReasonInputChange(); });
+    fineReasonSearch.addEventListener('change', () => { onReasonInputChange(); });
+    fineReasonSearch.addEventListener('blur', () => { onReasonInputChange(); });
 
     noticeTypeSelect.addEventListener('change', toggleNoticeFields);
     targetTypeSelect.addEventListener('change', onTargetTypeChange);
@@ -610,7 +733,8 @@
         } else {
             rawRules = [];
         }
-        populateRules();
+        populateCategories();
+        populateRules();      
     });
 
     const historyRef = ref(db, 'hospital_notices');
@@ -718,6 +842,3 @@
 
     toggleNoticeFields();
 </script>
-
-</body>
-</html>
