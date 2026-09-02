@@ -301,7 +301,7 @@
                 </div>
                 <div class="form-group">
                     <label>หัวข้อ</label>
-                    <input type="text" id="ruleTopic" class="form-control" list="topicList" placeholder="เช่น ..." required>
+                    <input type="text" id="ruleTopic" class="form-control" list="topicList" placeholder="เช่น ฝ่าไฟแดง" required>
                     <datalist id="topicList"></datalist>
                 </div>
                 <div class="form-group">
@@ -314,7 +314,7 @@
                 </div>
                 <div class="form-group">
                     <label>ค่าปรับ</label>
-                    <input type="text" id="ruleFine" class="form-control" placeholder="เช่น 5,000 หรือ / ตักเตือน">
+                    <input type="text" id="ruleFine" class="form-control" placeholder="เช่น 5,000 หรือ - (ตักเตือน)">
                 </div>
             </div>
             <button type="submit" id="ruleSubmitBtn" class="btn-submit">บันทึกข้อมูล</button>
@@ -672,15 +672,22 @@
             saveDataToFirebase(); 
         }
 
-// --- 4. จัดการกฎ / ค่าปรับ ---
+      // --- 4. จัดการกฎ / ค่าปรับ ---
         let collapsedState = {};
 
         function formatFineInput(value) {
             if (!value) return '';
-            let cleanNum = value.replace(/[^0-9]/g, '');
-            if (cleanNum === '') return value; 
-            let num = parseInt(cleanNum, 10);
-            return num.toLocaleString(); 
+            let match = value.match(/^([0-9,]+)\s*([\+\/\-].*)$/);
+            if (match) {
+                let cleanNum = match[1].replace(/[^0-9]/g, '');
+                if (cleanNum === '') return value;
+                let num = parseInt(cleanNum, 10);
+                return num.toLocaleString() + ' ' + match[2].trim();
+            } else {
+                let cleanNum = value.replace(/[^0-9]/g, '');
+                if (cleanNum === '' || isNaN(cleanNum)) return value;
+                return parseInt(cleanNum, 10).toLocaleString();
+            }
         }
 
         const ruleFineInputElem = document.getElementById('ruleFine');
@@ -737,103 +744,101 @@
             }
         }
 
-window.renderRules = function(filterQuery = "") {
-    const tbody = document.getElementById('ruleTableBody');
-    if (!tbody) return;
-    tbody.innerHTML = "";
+        window.renderRules = function(filterQuery = "") {
+            const tbody = document.getElementById('ruleTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = "";
 
-    updateRuleDatalists();
+            updateRuleDatalists();
 
-    const searchTerm = filterQuery ? filterQuery.toLowerCase() : '';
-    let filtered = rulesData.map((item, originalIndex) => ({ ...item, originalIndex })).filter(item => {
-        if (!searchTerm) return true;
-        return (item.category && item.category.toLowerCase().includes(searchTerm)) ||
-               (item.topic && item.topic.toLowerCase().includes(searchTerm)) ||
-               (item.ruleNo && item.ruleNo.toString().toLowerCase().includes(searchTerm)) ||
-               (item.name && item.name.toLowerCase().includes(searchTerm)) ||
-               (item.fine && item.fine.toLowerCase().includes(searchTerm));
-    });
-
-    if (filtered.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">ไม่พบข้อมูลกฎระเบียบที่ค้นหา</td></tr>`;
-        return;
-    }
-
-    const grouped = {};
-    filtered.forEach(item => {
-        const cat = item.category || 'อื่นๆ';
-        const top = item.topic || 'ทั่วไป';
-        if (!grouped[cat]) grouped[cat] = {};
-        if (!grouped[cat][top]) grouped[cat][top] = [];
-        grouped[cat][top].push(item);
-    });
-
-    for (const cat in grouped) {
-        for (const top in grouped[cat]) {
-            grouped[cat][top].sort((a, b) => {
-                return String(a.ruleNo || '').localeCompare(String(b.ruleNo || ''), undefined, { numeric: true });
+            const searchTerm = filterQuery ? filterQuery.toLowerCase() : '';
+            let filtered = rulesData.map((item, originalIndex) => ({ ...item, originalIndex })).filter(item => {
+                if (!searchTerm) return true;
+                return (item.category && item.category.toLowerCase().includes(searchTerm)) ||
+                       (item.topic && item.topic.toLowerCase().includes(searchTerm)) ||
+                       (item.ruleNo && item.ruleNo.toString().toLowerCase().includes(searchTerm)) ||
+                       (item.name && item.name.toLowerCase().includes(searchTerm)) ||
+                       (item.fine && item.fine.toLowerCase().includes(searchTerm));
             });
-        }
-    }
 
-    let html = '';
-    for (const cat in grouped) {
-        const catKey = 'cat_' + cat;
-        const isCatCollapsed = collapsedState[catKey] || false;
-        const catArrow = isCatCollapsed ? '▶' : '▼';
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; color:#888;">ไม่พบข้อมูลกฎระเบียบที่ค้นหา</td></tr>`;
+                return;
+            }
 
-        // เพิ่มแถบไฮไลท์สีชมพู/แดงด้านซ้าย (border-left) ให้กับแถวหมวดหมู่
-        html += `<tr class="group-header" style="border-left: 4px solid var(--primary-pink, #ff3366);">
-                    <td colspan="3" onclick="toggleGroup('${catKey}')" style="cursor: pointer;">
-                        <span class="toggle-icon">${catArrow}</span> 
-                        <span class="badge-cute-cyan">📁 หมวดหมู่: ${highlightKeywords(cat)}</span>
-                    </td>
-                    <td style="text-align: right;">
-                        <button type="button" class="btn-cute group-action-btn" onclick="renameCategory('${cat}'); event.stopPropagation();">✨ เปลี่ยนชื่อ</button>
-                    </td>
-                 </tr>`;
+            const grouped = {};
+            filtered.forEach(item => {
+                const cat = item.category || 'อื่นๆ';
+                const top = item.topic || 'ทั่วไป';
+                if (!grouped[cat]) grouped[cat] = {};
+                if (!grouped[cat][top]) grouped[cat][top] = [];
+                grouped[cat][top].push(item);
+            });
 
-        if (!isCatCollapsed) {
-            for (const top in grouped[cat]) {
-                const topKey = 'top_' + cat + '_' + top;
-                const isTopCollapsed = collapsedState[topKey] || false;
-                const topArrow = isTopCollapsed ? '▶' : '▼';
-                let count = grouped[cat][top].length;
-
-                // เพิ่มแถบไฮไลท์สีฟ้าด้านซ้าย (border-left) ให้กับแถวหัวข้อ
-                html += `<tr class="subgroup-header" style="border-left: 4px solid #38bdf8;">
-                            <td colspan="3" style="padding-left: 25px; cursor: pointer;" onclick="toggleGroup('${topKey}')">
-                                <span class="toggle-icon">${topArrow}</span> 
-                                <span class="badge-cute-gold">📂 หัวข้อ: ${highlightKeywords(top)}</span> 
-                                <span style="color: #aaa; font-size: 0.9em;">(${count} ข้อ)</span>
-                            </td>
-                            <td style="text-align: right;">
-                                <button type="button" class="btn-cute group-action-btn" onclick="renameTopic('${cat}', '${top}'); event.stopPropagation();">✨ เปลี่ยนชื่อ</button>
-                            </td>
-                         </tr>`;
-
-                if (!isTopCollapsed) {
-                    grouped[cat][top].forEach(item => {
-                        html += `
-                            <tr>
-                                <td style="padding-left: 45px;"><b>ข้อ ${item.ruleNo || '-'}</b></td>
-                                <td><b>${highlightKeywords(item.name || '')}</b></td>
-                                <td><span style="color: var(--primary-pink); font-weight: 500;">${highlightKeywords(item.fine || '-')}</span></td>
-                                <td>
-                                    <div class="action-btns">
-                                        <button type="button" class="btn-edit" onclick="editRule(${item.originalIndex}); event.stopPropagation();">แก้ไข</button>
-                                        <button type="button" class="btn-delete" onclick="deleteRule(${item.originalIndex}); event.stopPropagation();">ลบ</button>
-                                    </div>
-                                </td>
-                            </tr>
-                        `;
+            for (const cat in grouped) {
+                for (const top in grouped[cat]) {
+                    grouped[cat][top].sort((a, b) => {
+                        return String(a.ruleNo || '').localeCompare(String(b.ruleNo || ''), undefined, { numeric: true });
                     });
                 }
             }
+
+            let html = '';
+            for (const cat in grouped) {
+                const catKey = 'cat_' + cat;
+                const isCatCollapsed = collapsedState[catKey] || false;
+                const catArrow = isCatCollapsed ? '▶' : '▼';
+
+                html += `<tr class="group-header" style="border-left: 4px solid var(--primary-pink, #ff3366);">
+                            <td colspan="3" onclick="toggleGroup('${catKey}')" style="cursor: pointer;">
+                                <span class="toggle-icon">${catArrow}</span> 
+                                <span class="badge-cute-cyan">📁 หมวดหมู่: ${highlightKeywords(cat)}</span>
+                            </td>
+                            <td style="text-align: right;">
+                                <button type="button" class="btn-cute group-action-btn" onclick="renameCategory('${cat}'); event.stopPropagation();">✨ เปลี่ยนชื่อ</button>
+                            </td>
+                         </tr>`;
+
+                if (!isCatCollapsed) {
+                    for (const top in grouped[cat]) {
+                        const topKey = 'top_' + cat + '_' + top;
+                        const isTopCollapsed = collapsedState[topKey] || false;
+                        const topArrow = isTopCollapsed ? '▶' : '▼';
+                        let count = grouped[cat][top].length;
+
+                        html += `<tr class="subgroup-header" style="border-left: 4px solid #38bdf8;">
+                                    <td colspan="3" style="padding-left: 25px; cursor: pointer;" onclick="toggleGroup('${topKey}')">
+                                        <span class="toggle-icon">${topArrow}</span> 
+                                        <span class="badge-cute-gold">📂 หัวข้อ: ${highlightKeywords(top)}</span> 
+                                        <span style="color: #aaa; font-size: 0.9em;">(${count} ข้อ)</span>
+                                    </td>
+                                    <td style="text-align: right;">
+                                        <button type="button" class="btn-cute group-action-btn" onclick="renameTopic('${cat}', '${top}'); event.stopPropagation();">✨ เปลี่ยนชื่อ</button>
+                                    </td>
+                                 </tr>`;
+
+                        if (!isTopCollapsed) {
+                            grouped[cat][top].forEach(item => {
+                                html += `
+                                    <tr>
+                                        <td style="padding-left: 45px;"><b>ข้อ ${item.ruleNo || '-'}</b></td>
+                                        <td><b>${highlightKeywords(item.name || '')}</b></td>
+                                        <td><span style="color: var(--primary-pink); font-weight: 500;">${highlightKeywords(item.fine || '-')}</span></td>
+                                        <td>
+                                            <div class="action-btns">
+                                                <button type="button" class="btn-edit" onclick="editRule(${item.originalIndex}); event.stopPropagation();">แก้ไข</button>
+                                                <button type="button" class="btn-delete" onclick="deleteRule(${item.originalIndex}); event.stopPropagation();">ลบ</button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                `;
+                            });
+                        }
+                    }
+                }
+            }
+            tbody.innerHTML = html;
         }
-    }
-    tbody.innerHTML = html;
-}
 
         const ruleFormElem = document.getElementById('ruleForm');
         if (ruleFormElem) {
@@ -843,7 +848,7 @@ window.renderRules = function(filterQuery = "") {
                 
                 let ruleFineVal = document.getElementById('ruleFine').value.trim();
                 if (ruleFineVal) {
-                    ruleFineVal = formatFineInput(ruleFineVal); // จัดรูปแบบเฉพาะตัวเลขและคอมมาโดยไม่มีคำว่าบาท
+                    ruleFineVal = formatFineInput(ruleFineVal); 
                 }
 
                 const ruleObj = { 
@@ -885,11 +890,12 @@ window.renderRules = function(filterQuery = "") {
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-       window.deleteRule = function(index) { 
-    rulesData.splice(index, 1); 
-    saveDataToFirebase(); 
-}
+        window.deleteRule = function(index) { 
+            rulesData.splice(index, 1); 
+            saveDataToFirebase(); 
+        }
 
+        
         // --- 5. จัดการบริเวณ / สถานที่ ---
         window.renderLocations = function(filterQuery = "") {
             const tbody = document.getElementById('locationTableBody');
