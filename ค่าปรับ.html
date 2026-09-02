@@ -267,10 +267,17 @@
                         <datalist id="targetList"></datalist>
                     </div>
 
-                    <div class="form-group">
-                        <label>เลือกข้อหา :</label>
-                        <input type="text" id="ruleSearchInput" class="form-control" list="ruleList" placeholder="พิมพ์ค้นหาข้อหาจากระบบ..." oninput="onRuleSearchInput()">
-                        <datalist id="ruleList"></datalist>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                        <div class="form-group">
+                            <label>หมวดหมู่ข้อหา :</label>
+                            <input type="text" id="ruleCategoryInput" class="form-control" list="categoryList" placeholder="พิมพ์หรือเลือกหมวดหมู่..." oninput="onRuleCategoryInput()">
+                            <datalist id="categoryList"></datalist>
+                        </div>
+                        <div class="form-group">
+                            <label>เลือกข้อหาจากระบบ :</label>
+                            <input type="text" id="ruleSearchInput" class="form-control" list="ruleList" placeholder="พิมพ์ค้นหาข้อหา..." oninput="onRuleSearchInput()">
+                            <datalist id="ruleList"></datalist>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -346,6 +353,8 @@
         const officerNameInput = document.getElementById('officerNameInput');
         const doctorList = document.getElementById('doctorList');
 
+        const ruleCategoryInput = document.getElementById('ruleCategoryInput');
+        const categoryList = document.getElementById('categoryList');
         const ruleSearchInput = document.getElementById('ruleSearchInput');
         const ruleList = document.getElementById('ruleList');
         const fineReasonInput = document.getElementById('fineReason');
@@ -370,6 +379,7 @@
 
             renderTargetOptions();
             renderDoctorOptions();
+            renderCategoryOptions();
             renderRuleOptions();
             updatePreviews();
         });
@@ -386,7 +396,8 @@
                     type: item.type || 'ประชาชน',
                     position: item.position || '',
                     fine: item.fine || '',
-                    no: item.no || ''
+                    no: item.no || item.ruleNo || '',
+                    topic: item.topic || item.category || 'ทั่วไป'
                 };
             });
             return normalized.filter(i => i && (i.name || i.fine));
@@ -416,7 +427,6 @@
             uniqueItems.sort((a, b) => a.name.localeCompare(b.name, 'th'));
             uniqueItems.forEach(item => {
                 const opt = document.createElement('option');
-                // ถ้าเลือกประเภทเป็น "หมอ" ให้ value เป็นแค่ชื่อหมอเพียวๆ ไม่แสดงยศในวงเล็บ
                 if (type === 'หมอ') {
                     opt.value = item.name;
                 } else {
@@ -440,24 +450,57 @@
             });
         }
 
+        window.renderCategoryOptions = function() {
+            categoryList.innerHTML = '';
+            let categories = new Set();
+            appData.rules.forEach(rule => {
+                if (rule.topic) categories.add(rule.topic);
+            });
+
+            Array.from(categories).sort().forEach(cat => {
+                const opt = document.createElement('option');
+                opt.value = cat;
+                categoryList.appendChild(opt);
+            });
+        }
+
+        window.onRuleCategoryInput = function() {
+            ruleSearchInput.value = '';
+            renderRuleOptions();
+            updatePreviews();
+        }
+
         window.renderRuleOptions = function() {
             ruleList.innerHTML = '';
+            const selectedCategory = ruleCategoryInput.value.trim();
+
             appData.rules.forEach((rule) => {
+                const topic = rule.topic || 'ทั่วไป';
+                if (selectedCategory && topic !== selectedCategory && !topic.includes(selectedCategory)) {
+                    return;
+                }
+
                 const opt = document.createElement('option');
-                opt.value = `${rule.no ? `[${rule.no}] ` : ''}${rule.name} ${rule.fine ? `- (${rule.fine})` : ''}`;
+                const cNo = rule.no || '1';
+                opt.value = `[${topic}] ข้อ ${cNo}: ${rule.name} ${rule.fine ? `- (${rule.fine})` : ''}`;
                 ruleList.appendChild(opt);
             });
         }
 
         window.onRuleSearchInput = function() {
-            const val = ruleSearchInput.value;
+            const val = ruleSearchInput.value.trim();
             const matchedRule = appData.rules.find(rule => {
-                const fullStr = `${rule.no ? `[${rule.no}] ` : ''}${rule.name} ${rule.fine ? `- (${rule.fine})` : ''}`;
-                return fullStr === val || rule.name === val;
+                const cNo = rule.no || '1';
+                const topic = rule.topic || 'ทั่วไป';
+                const fullStr = `[${topic}] ข้อ ${cNo}: ${rule.name} ${rule.fine ? `- (${rule.fine})` : ''}`;
+                return fullStr === val || rule.name === val || val.includes(rule.name);
             });
 
             if (matchedRule) {
                 fineReasonInput.value = matchedRule.name || '';
+                if (matchedRule.topic) {
+                    ruleCategoryInput.value = matchedRule.topic;
+                }
                 if (matchedRule.fine !== undefined && matchedRule.fine !== null) {
                     let fineStr = String(matchedRule.fine).trim();
                     fineAmountInput.value = formatAmountWithIC(fineStr);
@@ -468,30 +511,27 @@
             updatePreviews();
         }
 
-        function formatAmountWithIC(val) {
+function formatAmountWithIC(val) {
             if (!val) return '';
             let cleanVal = val.replace(/IC/gi, '').trim();
-            if (cleanVal.includes('/')) {
-                let parts = cleanVal.split('/');
-                let numPart = parts[0].replace(/\D/g, '');
-                if (numPart) {
-                    numPart = Number(numPart).toLocaleString('en-US');
-                }
-                return `${numPart} IC / ${parts[1].trim()}`;
-            } else if (cleanVal.includes('ตักเตือน')) {
-                let numPart = cleanVal.replace(/\D/g, '');
-                if (numPart) {
-                    return `${Number(numPart).toLocaleString('en-US')} IC / ตักเตือน`;
-                }
-                return `ตักเตือน`;
+            
+            // ค้นหาตัวเลขกลุ่มแรก (จำนวนเงินตัวแรก)
+            let matchNum = cleanVal.match(/([0-9,]+)/);
+            if (!matchNum) return cleanVal;
+            
+            let rawNum = matchNum[1].replace(/[^0-9]/g, '');
+            let formattedNum = Number(rawNum).toLocaleString('en-US');
+            
+            // ตัดเอาตัวเลขตัวแรกออก แล้วเก็บข้อความหรือเครื่องหมายที่เหลือไว้ทั้งหมดแบบตรงเป๊ะ
+            let restOfText = cleanVal.replace(matchNum[1], '').trim();
+            
+            if (restOfText) {
+                return `${formattedNum} IC ${restOfText}`;
             } else {
-                let numPart = cleanVal.replace(/\D/g, '');
-                if (numPart) {
-                    return `${Number(numPart).toLocaleString('en-US')} IC`;
-                }
-                return cleanVal;
+                return `${formattedNum} IC`;
             }
         }
+
 
         window.onTargetTypeChange = function() {
             const val = targetTypeSelect.value;
@@ -533,8 +573,6 @@
         window.updatePreviews = function() {
             const type = targetTypeSelect.value;
             let rawName = targetNameInput.value.trim();
-            
-            // ถ้าเลือกประเภทเป็น "หมอ" ให้ตัดยศ (ถ้ามีติดมา) ออกให้เหลือแค่ชื่อเพียวๆ ในข้อความแสดงผล
             let name = rawName ? (type === 'หมอ' ? rawName.split(' (')[0].trim() : rawName) : '.....';
 
             const reason = fineReasonInput.value.trim() || '.....';
