@@ -357,7 +357,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
@@ -383,14 +383,31 @@
         const clockTime = document.getElementById('clockTime');
 
         let locationsData = [];
-        let historyData = JSON.parse(localStorage.getItem('announcement_history') || '[]');
+        let historyData = [];
 
+        // โหลดข้อมูลสถานที่จาก Firebase แบบ Real-time
         onValue(ref(db, 'aroundTown'), (snapshot) => {
             const data = snapshot.val() || {};
             locationsData = data.locations || [];
             locationsData.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'th'));
         }, (error) => {
             console.error("Firebase connection error: ", error);
+        });
+
+        // [ปรับใหม่] โหลดประวัติจาก Firebase แบบ Real-time ข้ามเครื่อง
+        onValue(ref(db, 'aroundTown/announcement_history'), (snapshot) => {
+            const data = snapshot.val() || {};
+            // แปลงข้อมูลจาก Firebase Object ให้เป็น Array และเรียงจากล่าสุดขึ้นบน
+            historyData = Object.values(data).reverse();
+
+            if (historyData.length > 50) {
+                historyData = historyData.slice(0, 50);
+            }
+
+            updateHistoryCount();
+            if (document.getElementById('tabHistory').classList.contains('active')) {
+                renderHistory();
+            }
         });
 
         function parseLocationItem(fullName) {
@@ -536,10 +553,9 @@
                 hour: '2-digit', minute: '2-digit', second: '2-digit' 
             });
 
-            historyData.unshift({ time: timeString, text: text });
-            if (historyData.length > 50) historyData.pop();
-            localStorage.setItem('announcement_history', JSON.stringify(historyData));
-            updateHistoryCount();
+            // [ปรับใหม่] บันทึกประวัติขึ้น Firebase เพื่อให้ทุกเครื่องเห็นตรงกัน
+            const historyRef = ref(db, 'aroundTown/announcement_history');
+            push(historyRef, { time: timeString, text: text });
         }
 
         function renderHistory() {
@@ -567,14 +583,16 @@
         }
 
         window.clearHistory = function() {
-            historyData = [];
-            localStorage.removeItem('announcement_history');
-            renderHistory();
-            showToast("ล้างประวัติสำเร็จ");
+            if (confirm('คุณต้องการล้างประวัติทั้งหมดใช่หรือไม่?')) {
+                // [ปรับใหม่] ลบข้อมูลประวัติออกจาก Firebase ทำให้หายไปทุกเครื่องพร้อมกัน
+                const historyRef = ref(db, 'aroundTown/announcement_history');
+                remove(historyRef).then(() => {
+                    showToast("ล้างประวัติสำเร็จ");
+                });
+            }
         }
 
         updateHistoryCount();
     </script>
-
-</body>
+    </body>
 </html>
