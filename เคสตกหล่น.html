@@ -27,7 +27,7 @@
             box-sizing: border-box;
         }
 
-        /* หัวข้อใหญ่ด้านบน ขยายให้สมส่วนกับจอคอม */
+        /* หัวข้อใหญ่ด้านบน พร้อมปุ่มสลับหน้า */
         .page-header {
             background-color: #18181b;
             border: 1px solid #27272a;
@@ -40,8 +40,42 @@
             box-shadow: 0 8px 16px rgba(0,0,0,0.4);
             display: flex;
             align-items: center;
-            justify-content: center;
+            justify-content: space-between;
             gap: 10px;
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
+        .tab-btn {
+            background: #09090b;
+            border: 1px solid #27272a;
+            color: #a1a1aa;
+            padding: 6px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-family: 'Prompt', sans-serif;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .tab-btn.active {
+            background: #f43f5e;
+            color: #fff;
+            border-color: #f43f5e;
+        }
+
+        /* ตั้งค่าบังคับซ่อน/แสดงหน้าจออย่างเด็ดขาด */
+        .tab-content {
+            display: none !important;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .tab-content.active {
+            display: flex !important;
         }
 
         .form-card {
@@ -97,6 +131,7 @@
             margin: 8px 0 6px 0;
             display: flex;
             align-items: center;
+            justify-content: space-between;
             gap: 8px;
         }
 
@@ -145,6 +180,67 @@
             box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3) !important;
         }
 
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            background-color: #09090b;
+            border: 1px solid #27272a;
+            padding: 14px;
+            border-radius: 10px;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .history-header-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-time {
+            font-size: 11px;
+            color: #f43f5e;
+            font-weight: 500;
+        }
+
+        .btn-delete-single {
+            background: transparent;
+            border: 1px solid #ef4444;
+            color: #ef4444;
+            padding: 2px 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Prompt', sans-serif;
+            font-size: 11px;
+            transition: all 0.2s;
+        }
+
+        .btn-delete-single:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .history-text {
+            color: #e4e4e7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .empty-history {
+            text-align: center;
+            color: #71717a;
+            padding: 40px;
+            font-size: 14px;
+        }
+
         #toast {
             visibility: hidden;
             min-width: 200px;
@@ -154,7 +250,7 @@
             border-radius: 10px;
             padding: 12px;
             position: fixed;
-            z-index: 1;
+            z-index: 10;
             left: 50%;
             bottom: 30px;
             transform: translateX(-50%);
@@ -183,13 +279,20 @@
 
     <div class="container">
 
-        <!-- หัวข้อใหญ่ด้านบน -->
+        <!-- หัวข้อใหญ่ด้านบน พร้อมปุ่มสลับหน้า -->
         <div class="page-header">
-            <span>🚨</span>
-            <span>ประกาศไม่พบศพ</span>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <span>🚨</span>
+                <span>ประกาศไม่พบศพ</span>
+            </div>
+            <div class="nav-tabs">
+                <button class="tab-btn active" onclick="switchTab('form', this)">ฟอร์มประกาศ</button>
+                <button class="tab-btn" onclick="switchTab('history', this)">ประวัติ <span id="historyCount" style="background:#f43f5e; color:#fff; padding:1px 5px; border-radius:4px; font-size:10px;">0</span></button>
+            </div>
         </div>
 
-        <div class="form-card">
+        <!-- หน้าที่ 1: ฟอร์มประกาศ -->
+        <div id="tabForm" class="tab-content active form-card">
             <div class="form-row">
                 <div class="form-group" style="flex: 1.2;">
                     <label for="charName">ชื่อผู้สลบ :</label>
@@ -210,7 +313,7 @@
             </div>
 
             <div>
-                <div class="section-title">📝 ข้อความสำหรับในเกม </div>
+                <div class="section-title">📝 ข้อความสำหรับในเกม</div>
                 <div id="previewGame" class="preview-box"></div>
                 <div style="margin-top: 10px;">
                     <button id="btnGame" class="btn-action" onclick="copyGameText()">📋 คัดลอกข้อความในเกม</button>
@@ -226,11 +329,40 @@
             </div>
         </div>
 
+        <!-- หน้าที่ 2: ประวัติการประกาศ (แยกหน้าต่างหาก 100%) -->
+        <div id="tabHistory" class="tab-content form-card">
+            <div class="section-title">
+                <span>📜 ประวัติการประกาศทั้งหมด (ซิงค์ Real-time ข้ามเครื่อง)</span>
+                <button onclick="clearAllHistory()" style="background: transparent; border: 1px solid #ef4444; color: #ef4444; padding: 3px 8px; border-radius: 6px; cursor: pointer; font-family: 'Prompt'; font-size: 11px;">ล้างประวัติทั้งหมด</button>
+            </div>
+            <div id="historyList" class="history-list">
+                <div class="empty-history">ยังไม่มีประวัติการประกาศ</div>
+            </div>
+        </div>
+
     </div>
 
     <div id="toast">คัดลอกข้อความสำเร็จ!</div>
 
-    <script>
+    <!-- Firebase SDK และระบบจัดการข้อมูล -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
+        import { getDatabase, ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
+            authDomain: "around-town-armd-684f7.firebaseapp.com",
+            databaseURL: "https://around-town-armd-684f7-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "around-town-armd-684f7",
+            storageBucket: "around-town-armd-684f7.firebasestorage.app",
+            messagingSenderId: "176321996941",
+            appId: "1:176321996941:web:f697ff48100754a4bb9ac4",
+            measurementId: "G-YV720SHKR0"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
         const nameInput = document.getElementById('charName');
         const phoneInput = document.getElementById('charPhone');
         const caseTypeSelect = document.getElementById('caseType');
@@ -240,6 +372,19 @@
 
         const btnGame = document.getElementById('btnGame');
         const btnDiscord = document.getElementById('btnDiscord');
+        const historyList = document.getElementById('historyList');
+        const historyCount = document.getElementById('historyCount');
+
+        let historyMap = {};
+
+        // ดึงข้อมูลประวัติจาก Firebase แบบ Real-time
+        onValue(ref(db, 'caseAnnouncement/history'), (snapshot) => {
+            const data = snapshot.val() || {};
+            historyMap = data; 
+
+            updateHistoryCount();
+            renderHistory();
+        });
 
         function getName() {
             return nameInput.value.trim() || '.....';
@@ -269,6 +414,19 @@
 
         updatePreviews();
 
+        window.switchTab = function(tabName, el) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            
+            if (tabName === 'form') {
+                document.getElementById('tabForm').classList.add('active');
+            } else {
+                document.getElementById('tabHistory').classList.add('active');
+                renderHistory();
+            }
+            el.classList.add('active');
+        }
+
         function showToast(message) {
             const toast = document.getElementById("toast");
             toast.textContent = message;
@@ -285,19 +443,86 @@
             }, 1500);
         }
 
-        function copyGameText() {
-            navigator.clipboard.writeText(previewGame.textContent).then(() => {
+        function addHistoryToFirebase(text) {
+            const now = new Date();
+            const timeString = now.toLocaleDateString('th-TH', { 
+                year: 'numeric', month: 'short', day: 'numeric', 
+                hour: '2-digit', minute: '2-digit', second: '2-digit' 
+            });
+
+            const historyRef = ref(db, 'caseAnnouncement/history');
+            push(historyRef, { time: timeString, text: text });
+        }
+
+        window.copyGameText = function() {
+            const textToCopy = previewGame.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 showToast("คัดลอกข้อความในเกมสำเร็จ!");
                 triggerButtonAnimation(btnGame, '📋 คัดลอกข้อความในเกม');
+                addHistoryToFirebase(textToCopy);
             });
         }
 
-        function copyDiscordText() {
-            navigator.clipboard.writeText(previewDiscord.textContent).then(() => {
+        window.copyDiscordText = function() {
+            const textToCopy = previewDiscord.textContent;
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 showToast("คัดลอกข้อความ Discord สำเร็จ!");
                 triggerButtonAnimation(btnDiscord, '📋 คัดลอกข้อความ Discord');
+                addHistoryToFirebase(textToCopy);
             });
         }
+
+        function renderHistory() {
+            const keys = Object.keys(historyMap);
+            if (keys.length === 0) {
+                historyList.innerHTML = '<div class="empty-history">ยังไม่มีประวัติการประกาศ</div>';
+                updateHistoryCount();
+                return;
+            }
+
+            const items = keys.map(key => ({ id: key, ...historyMap[key] })).reverse();
+
+            historyList.innerHTML = '';
+            items.forEach((item) => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="history-header-row">
+                        <div class="history-time">🕒 คัดลอกเมื่อ: ${item.time}</div>
+                        <button class="btn-delete-single" onclick="deleteSingleHistory('${item.id}')">ลบ</button>
+                    </div>
+                    <div class="history-text">${item.text}</div>
+                `;
+                historyList.appendChild(div);
+            });
+            updateHistoryCount();
+        }
+
+        function updateHistoryCount() {
+            if (historyCount) {
+                historyCount.textContent = Object.keys(historyMap).length;
+            }
+        }
+
+        window.deleteSingleHistory = function(id) {
+            if (confirm('คุณต้องการลบรายการนี้ใช่หรือไม่?')) {
+                const singleRef = ref(db, `caseAnnouncement/history/${id}`);
+                remove(singleRef).then(() => {
+                    showToast("ลบรายการสำเร็จ");
+                });
+            }
+        }
+
+        window.clearAllHistory = function() {
+            if (confirm('คุณต้องการล้างประวัติทั้งหมดใช่หรือไม่? (จะมีผลกับทุกเครื่องที่เปิดอยู่)')) {
+                const historyRef = ref(db, 'caseAnnouncement/history');
+                remove(historyRef).then(() => {
+                    showToast("ล้างประวัติทั้งหมดสำเร็จ");
+                });
+            }
+        }
+
+        updateHistoryCount();
     </script>
 
 </body>
