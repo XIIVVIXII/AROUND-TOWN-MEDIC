@@ -263,6 +263,14 @@
             color: #94a3b8;
             margin-bottom: 6px;
         }
+
+    .time-btn.btn-click-flash {
+    background-color: #5ace77 !important; /* เปลี่ยนเป็นสีที่ต้องการตอนกด เช่น สีฟ้า */
+    color: #ffffff !important;
+    transform: scale(0.95);
+    transition: all 0.1s ease;
+}
+
     </style>
 </head>
 <body>
@@ -345,8 +353,8 @@
     const db = getDatabase(app);
 
     let citizensData = [];
-    const availableTimes = [3, 5];
-    let selectedDuration = 3;
+    const availableTimes = [5];
+    let selectedDuration = 5;
     let historyList = [];
 
     // ดึงข้อมูลรายชื่อประชาชนจาก Firebase
@@ -393,7 +401,7 @@
     window.switchPage = function(pageNum) {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-        
+
         document.getElementById(`page${pageNum}`).classList.add('active');
         document.querySelectorAll('.nav-btn')[pageNum - 1].classList.add('active');
 
@@ -415,11 +423,11 @@
         const selectedType = document.getElementById('targetType').value.trim();
         const keyword = document.getElementById('targetNameInput').value.toLowerCase().trim();
         const dropdown = document.getElementById('searchDropdown');
-        
+
         const filteredNames = citizensData.filter(item => {
             if (!item || !item.name) return false;
             const itemType = String(item.type || '').trim();
-            
+
             let matchType = false;
             if (selectedType === 'แก๊ง') {
                 matchType = (itemType === 'แก๊ง' || itemType === 'แก๊งค์');
@@ -468,19 +476,26 @@
         }
     });
 
-    function renderTimeButtons() {
+ function renderTimeButtons() {
         const container = document.getElementById('timeButtonsContainer');
         if (!container) return;
         container.innerHTML = '';
-        
+
         availableTimes.forEach((time) => {
             let btn = document.createElement('button');
             btn.className = `time-btn ${time === selectedDuration ? 'active' : ''}`;
             btn.innerText = `${time} นาที`;
             btn.onclick = () => {
+                // เพิ่มเอฟเฟกต์เปลี่ยนสีก่อน
+                btn.classList.add('btn-click-flash');
+                
                 selectedDuration = time;
-                renderTimeButtons();
-                generateText();
+                
+                // หน่วงเวลาเล็กน้อยให้เห็นการเปลี่ยนสีก่อนจะเรนเดอร์ใหม่
+                setTimeout(() => {
+                    renderTimeButtons();
+                    generateText();
+                }, 250);
             };
             container.appendChild(btn);
         });
@@ -489,19 +504,19 @@
     window.generateText = function() {
         const typeElem = document.getElementById('targetType');
         const nameElem = document.getElementById('targetNameInput');
-        
+
         if (!typeElem || !nameElem) return;
 
         const type = typeElem.value;
         const nameInputVal = nameElem.value.trim();
-        
+
         const now = new Date();
         const startTimeStr = formatTime(now);
-        
+
         const duration = Number(selectedDuration) || 0;
         const endTime = new Date(now.getTime() + duration * 60000);
         const endTimeStr = formatTime(endTime);
-        
+
         let displayTarget = nameInputVal !== '' ? `${nameInputVal}` : '.....';
         let prefix = "";
 
@@ -520,7 +535,7 @@
 
         const gameText = `ประกาศออกจากพื้นที่โรงพยาบาล ${prefix} ออกจากพื้นที่โรงพยาบาลภายใน ระยะเวลา ${duration} นาที เริ่มตั้งแต่เวลา ${cleanStart} ถึง ${cleanEnd} ขอบคุณครับ/ค่ะ`;
         const discordText = `# ประกาศออกจากพื้นที่โรงพยาบาล \n\`\`\`\nประกาศออกจากพื้นที่โรงพยาบาล  ${prefix} ออกจากพื้นที่โรงพยาบาลภายใน ระยะเวลา ${duration} นาที เริ่มตั้งแต่เวลา ${cleanStart} ถึง ${cleanEnd} ขอบคุณครับ/ค่ะ\n\`\`\`\n<@&1473606329536090258>`;
-        
+
         const gamePreview = document.getElementById('gamePreview');
         const discordPreview = document.getElementById('discordPreview');
 
@@ -543,12 +558,12 @@
             const originalText = btn.innerText;
             btn.classList.add('btn-success-flash');
             btn.innerText = '✓ คัดลอกสำเร็จ!';
-            
+
             setTimeout(() => {
                 btn.classList.remove('btn-success-flash');
                 btn.innerText = originalText;
             }, 1000);
-            
+
             // บันทึกประวัติลง Firebase เพื่อให้ทุกคนเห็นร่วมกัน
             const historyRef = ref(db, 'aroundTown/cooldown_history');
             const newHistoryItem = {
