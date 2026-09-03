@@ -180,7 +180,7 @@
     </main>
 
     <!-- JavaScript ระบบทำงาน -->
-    <script type="module">
+  <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
         import { getDatabase, ref, onValue, set } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
@@ -240,6 +240,16 @@
             });
         }
 
+        // ดึงข้อมูลประวัติจาก Firebase (เพิ่มเข้ามาเพื่อให้ซิงค์ประวัติพร้อมกัน)
+        function fetchHistoryFromFirebase() {
+            const historyRef = ref(db, 'aroundTown/historyData');
+            onValue(historyRef, (snapshot) => {
+                const data = snapshot.val();
+                historyData = data ? Object.values(data) : [];
+                renderHistoryTable();
+            });
+        }
+
         // บันทึกคิวลง Firebase
         function saveQueueToFirebase() {
             set(ref(db, 'aroundTown/queueList'), queueList);
@@ -250,9 +260,15 @@
             set(ref(db, 'aroundTown/activeRunning'), activeRunning);
         }
 
+        // บันทึกประวัติลง Firebase (เพิ่มเข้ามา)
+        function saveHistoryToFirebase() {
+            set(ref(db, 'aroundTown/historyData'), historyData);
+        }
+
         fetchDoctorsFromFirebase();
         fetchQueueFromFirebase();
         fetchActiveRunningFromFirebase();
+        fetchHistoryFromFirebase(); // เรียกใช้งานการดึงประวัติ
 
         function formatThaiDate(isoStr) {
             if (!isoStr) return "";
@@ -662,6 +678,8 @@
                 duration: totalDuration
             });
 
+            saveHistoryToFirebase(); // บันทึกประวัติลง Firebase ทันที
+
             activeRunning.splice(index, 1);
             saveActiveRunningToFirebase();
             renderActiveRunning();
@@ -714,6 +732,7 @@
 
         window.clearHistory = function() {
             historyData = [];
+            saveHistoryToFirebase(); // ลบและเคลียร์ประวัติพร้อมกันบน Firebase
             renderHistoryTable();
         }
     </script>
