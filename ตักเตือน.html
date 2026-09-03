@@ -429,29 +429,34 @@
     let rawCitizens = [];
     let rawRules = [];
 
-    function formatFineInput(input) {
-        let val = input.value;
-        let parts = val.split('/');
-        let numStr = parts[0].replace(/[^\d]/g, '');
-        
-        if (numStr) {
-            let formattedNum = Number(numStr).toLocaleString('en-US');
-            if (parts.length > 1) {
-                input.value = formattedNum + ' / ' + parts.slice(1).join('/').trim();
-            } else {
-                let textAfterNum = val.replace(/[\d,]/g, '').trim();
-                if (textAfterNum && !val.includes('/')) {
-                    input.value = formattedNum + ' ' + textAfterNum;
+function formatFineInput(input) {
+            let val = input.value;
+            let parts = val.split('/');
+            
+            // เช็คว่าตัวอักษรตัวแรกสุดเป็นตัวเลขหรือไม่ (0-9)
+            let isStartsWithNumber = /^[0-9]/.test(val.trim());
+            
+            let numStr = parts[0].replace(/[^\d]/g, '');
+            
+            if (numStr) {
+                let formattedNum = Number(numStr).toLocaleString('en-US');
+                if (parts.length > 1) {
+                    let suffix = parts.slice(1).join('/').trim();
+                    input.value = isStartsWithNumber ? (formattedNum + ' IC / ' + suffix) : (formattedNum + ' / ' + suffix);
                 } else {
-                    input.value = formattedNum;
+                    let textAfterNum = val.replace(/[\d,]/g, '').trim();
+                    if (textAfterNum && !val.includes('/')) {
+                        input.value = isStartsWithNumber ? (formattedNum + ' IC ' + textAfterNum) : (formattedNum + ' ' + textAfterNum);
+                    } else {
+                        input.value = isStartsWithNumber ? (formattedNum + ' IC') : formattedNum;
+                    }
                 }
+            } else if (val.includes('/')) {
+                input.value = ' / ' + parts.slice(1).join('/').trim();
             }
-        } else if (val.includes('/')) {
-            input.value = ' / ' + parts.slice(1).join('/').trim();
+            updatePreviews();
         }
-        updatePreviews();
-    }
-    window.formatFineInput = formatFineInput;
+        window.formatFineInput = formatFineInput;
 
     function switchTab(tabName) {
         document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
@@ -625,32 +630,32 @@
         const reason = parsedRule.reason;
         const blClause = parsedRule.clause;
 
-        let rawAmountText = fineAmountInput.value.trim() || '...';
+let rawAmountText = fineAmountInput.value.trim() || '...';
         let formattedAmount = rawAmountText;
         
-        // จัดการแทรก IC ไว้หลังตัวเลขจำนวนเงินตัวแรก (ก่อนเครื่องหมาย +, -, / หรือข้อความต่อท้าย)
-        let matchAmount = formattedAmount.match(/^([0-9,]+)(\s*[\+\-\/].*|[\s\+].*|.*)$/);
-        
-        // ปรับปรุง Regex ให้รองรับการแยกตัวเลขกับส่วนที่เหลือได้อย่างแม่นยำยิ่งขึ้น
+        let isStartsWithNumber = /^[0-9]/.test(formattedAmount.trim());
         let splitMatch = formattedAmount.match(/^([0-9,]+)(.*)$/);
+        
         if (splitMatch) {
             let numPart = splitMatch[1].replace(/ic/gi, '').trim();
             let restPart = splitMatch[2].replace(/ic/gi, '').trim();
+            let formattedNum = Number(numPart.replace(/[^0-9]/g, '')).toLocaleString('en-US');
             
-            // ถ้ามีส่วนที่เหลือ (เช่น +บำเพ็ญ หรือ -บำเพ็ญ หรือ /...) ให้ใส่ IC ไว้ตรงกลาง
-            if (restPart) {
-                // เช็คว่า restPart ขึ้นต้นด้วยเครื่องหมาย + - / หรือไม่ ถ้าใช่ให้ต่อเลย ถ้าไม่ใช่ให้เว้นวรรค
-                let firstChar = restPart.charAt(0);
-                if (['+', '-', '/'].includes(firstChar)) {
-                    formattedAmount = `${numPart} IC ${restPart}`;
+            if (isStartsWithNumber) {
+                if (restPart) {
+                    formattedAmount = `${formattedNum} IC ${restPart}`;
                 } else {
-                    formattedAmount = `${numPart} IC ${restPart}`;
+                    formattedAmount = `${formattedNum} IC`;
                 }
             } else {
-                formattedAmount = `${numPart} IC`;
+                if (restPart) {
+                    formattedAmount = `${formattedNum} ${restPart}`;
+                } else {
+                    formattedAmount = `${formattedNum}`;
+                }
             }
         } else {
-            if (!formattedAmount.toLowerCase().includes('ic')) {
+            if (isStartsWithNumber && !formattedAmount.toLowerCase().includes('ic')) {
                 formattedAmount += ' IC';
             }
         }
