@@ -17,8 +17,52 @@
             --success-green: #00e676; 
         }
         body { font-family: 'Kanit', sans-serif; background-color: var(--bg-dark); color: var(--text-main); margin: 0; padding: 30px 20px; }
-        .main-wrapper { max-width: 600px; margin: 0 auto; }
+        .main-wrapper { max-width: 600px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         
+        /* เพิ่มเติม: แถบเมนูปุ่มสลับหน้า */
+        .nav-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            padding: 12px 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+        }
+        .nav-title-text {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary-pink);
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 8px;
+        }
+        .nav-btn {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            color: var(--text-muted);
+            padding: 8px 16px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+        .nav-btn.active {
+            background: var(--primary-pink);
+            color: white;
+            border-color: var(--primary-pink);
+        }
+
+        /* ระบบสลับหน้า Content */
+        .page-content {
+            display: none;
+        }
+        .page-content.active {
+            display: block;
+        }
+
         .section-card { 
             background: var(--card-bg); 
             padding: 30px; 
@@ -139,42 +183,118 @@
             background: var(--success-green);
             color: #0b0f19;
         }
+
+        /* ดีไซน์หน้าประวัติเพิ่มเติม */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 450px;
+            overflow-y: auto;
+        }
+        .history-item {
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .history-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        .history-text {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            word-break: break-all;
+            white-space: pre-line;
+        }
+        .btn-delete {
+            background: transparent;
+            border: 1px solid #ff4775;
+            color: #ff4775;
+            padding: 2px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Kanit', sans-serif;
+            font-size: 0.8rem;
+            transition: 0.2s;
+        }
+        .btn-delete:hover {
+            background: #ff4775;
+            color: white;
+        }
+        .empty-history {
+            text-align: center;
+            color: var(--text-muted);
+            padding: 40px 0;
+        }
     </style>
 </head>
 <body>
 
     <div class="main-wrapper">
-        <div class="section-card">
-            <div class="section-title">ระบบประกาศเรียกตัว</div>
-            <div class="section-subtitle">พิมพ์ค้นหาหรือเลือกชื่อจากระบบเพื่อสร้างข้อความประกาศ</div>
-
-            <div class="form-group">
-                <label>เป้าหมาย</label>
-                <select id="targetType" onchange="onTypeChange()">
-                    <option value="gang">แก๊ง</option>
-                    <option value="family">ครอบครัว</option>
-                    <option value="citizen">ประชาชน</option>
-                </select>
+        <!-- แถบสลับหน้า (เพิ่มเข้ามาใหม่ด้านบน) -->
+        <div class="nav-header">
+            <div class="nav-title-text">Hospital Portal</div>
+            <div class="nav-buttons">
+                <button class="nav-btn active" onclick="switchPage('formPage', this)">หน้าแรก</button>
+                <button class="nav-btn" onclick="switchPage('historyPage', this)">ประวัติ <span id="historyBadge" style="background:#ff4775; color:#fff; padding:1px 6px; border-radius:6px; font-size:0.75rem;">0</span></button>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label>พิมพ์หรือเลือกชื่อเป้าหมาย</label>
-                <input type="text" id="targetNameInput" placeholder="พิมพ์ชื่อเพื่อค้นหา..." autocomplete="off" oninput="filterDropdown()" onfocus="showDropdown()">
-                <div id="dropdownList" class="dropdown-list"></div>
+        <!-- หน้าที่ 1: ฟอร์มหลัก (โค้ดเดิมของคุณ) -->
+        <div id="formPage" class="page-content active">
+            <div class="section-card">
+                <div class="section-title">ระบบประกาศเรียกตัว</div>
+                <div class="section-subtitle">พิมพ์ค้นหาหรือเลือกชื่อจากระบบเพื่อสร้างข้อความประกาศ</div>
+
+                <div class="form-group">
+                    <label>เป้าหมาย</label>
+                    <select id="targetType" onchange="onTypeChange()">
+                        <option value="gang">แก๊ง</option>
+                        <option value="family">ครอบครัว</option>
+                        <option value="citizen">ประชาชน</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>พิมพ์หรือเลือกชื่อเป้าหมาย</label>
+                    <input type="text" id="targetNameInput" placeholder="พิมพ์ชื่อเพื่อค้นหา..." autocomplete="off" oninput="filterDropdown()" onfocus="showDropdown()">
+                    <div id="dropdownList" class="dropdown-list"></div>
+                </div>
+
+                <div class="form-group">
+                    <label>ข้อความประกาศสำหรับคัดลอก</label>
+                    <div class="preview-box" id="previewText">ขอเชิญ แก๊ง : - มาติดต่อที่หน้าโรงพยาบาลภายใน 10 นาทีด้วยค่ะ/ครับ</div>
+                </div>
+
+                <button class="copy-btn" id="copyBtn" onclick="copyAnnouncement()">📋 คัดลอกข้อความ</button>
             </div>
+        </div>
 
-            <div class="form-group">
-                <label>ข้อความประกาศสำหรับคัดลอก</label>
-                <div class="preview-box" id="previewText">ขอเชิญ แก๊ง : - มาติดต่อที่หน้าโรงพยาบาลภายใน 10 นาทีด้วยค่ะ/ครับ</div>
+        <!-- หน้าที่ 2: หน้าประวัติการคัดลอก (เพิ่มเข้ามาใหม่ ซิงค์ Real-time) -->
+        <div id="historyPage" class="page-content">
+            <div class="section-card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <div style="font-size: 1.4rem; font-weight: 600;">ประวัติการประกาศทั้งหมด</div>
+                    <button class="btn-delete" onclick="clearAllHistory()" style="border-color: #ef4444; color: #ef4444;">ล้างประวัติทั้งหมด</button>
+                </div>
+                <div id="historyListContainer" class="history-list">
+                    <div class="empty-history">กำลังโหลดประวัติ...</div>
+                </div>
             </div>
-
-            <button class="copy-btn" id="copyBtn" onclick="copyAnnouncement()">📋 คัดลอกข้อความ</button>
         </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+        import { getDatabase, ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDCoCTe-4c5EwySpeCF9Lzkx9WaDiBeGIE",
@@ -191,6 +311,7 @@
         const db = getDatabase(app);
 
         let allCitizens = [];
+        let historyDataMap = {};
 
         const typeMapping = {
             gang: "แก๊ง",
@@ -276,6 +397,16 @@
             document.getElementById('previewText').innerText = result;
         }
 
+        // ฟังก์ชันสลับหน้าเว็บระหว่างหน้าแรกกับหน้าประวัติ
+        window.switchPage = function(pageId, btnEl) {
+            document.querySelectorAll('.page-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+
+            document.getElementById(pageId).classList.add('active');
+            btnEl.classList.add('active');
+        }
+
+        // กดคัดลอก แล้วบันทึกส่งเข้า Firebase Real-time ทันที
         window.copyAnnouncement = function() {
             const text = document.getElementById('previewText').innerText;
             const btn = document.getElementById('copyBtn');
@@ -284,6 +415,18 @@
                 btn.innerText = "คัดลอกสำเร็จ!";
                 btn.classList.add("copied");
 
+                // บันทึกประวัติไปที่ Firebase (โหนด hospitalHistory) เพื่อให้ทุกเครื่องเห็นเหมือนกัน
+                const now = new Date();
+                const timeString = now.toLocaleDateString('th-TH', { 
+                    year: 'numeric', month: 'short', day: 'numeric', 
+                    hour: '2-digit', minute: '2-digit', second: '2-digit' 
+                });
+
+                push(ref(db, 'hospitalHistory'), {
+                    time: timeString,
+                    text: text
+                });
+
                 setTimeout(() => {
                     btn.innerText = "📋 คัดลอกข้อความ";
                     btn.classList.remove("copied");
@@ -291,7 +434,21 @@
             });
         }
 
-        // --- โหลดข้อมูลแบบ Real-time จาก Firebase โหนด citizens ---
+        // ฟังก์ชันลบรายการประวัติเดี่ยว (ซิงค์ Real-time)
+        window.deleteHistoryItem = function(id) {
+            if (confirm("คุณต้องการลบรายการนี้ใช่หรือไม่?")) {
+                remove(ref(db, `hospitalHistory/${id}`));
+            }
+        }
+
+        // ฟังก์ชันล้างประวัติทั้งหมด (ซิงค์ Real-time)
+        window.clearAllHistory = function() {
+            if (confirm("คุณต้องการล้างประวัติทั้งหมดใช่หรือไม่?")) {
+                remove(ref(db, 'hospitalHistory'));
+            }
+        }
+
+        // โหลดข้อมูลรายชื่อแบบ Real-time จาก Firebase โหนด citizens เดิมของคุณ
         onValue(ref(db, 'aroundTown/citizens'), (snapshot) => {
             const data = snapshot.val() || [];
             if (Array.isArray(data)) {
@@ -303,6 +460,44 @@
         }, (error) => {
             console.error("Firebase connection error: ", error);
         });
+
+        // ดึงข้อมูลประวัติการประกาศแบบ Real-time ข้ามเครื่องจาก Firebase
+        onValue(ref(db, 'hospitalHistory'), (snapshot) => {
+            const data = snapshot.val() || {};
+            historyDataMap = data;
+            renderHistoryList();
+        });
+
+        // เรนเดอร์แสดงผลประวัติลงในหน้า 2
+        function renderHistoryList() {
+            const container = document.getElementById('historyListContainer');
+            const badge = document.getElementById('historyBadge');
+            const keys = Object.keys(historyDataMap);
+
+            badge.innerText = keys.length;
+
+            if (keys.length === 0) {
+                container.innerHTML = `<div class="empty-history">ยังไม่มีประวัติการประกาศ</div>`;
+                return;
+            }
+
+            // เรียงลำดับจากใหม่ไปเก่า
+            const items = keys.map(key => ({ id: key, ...historyDataMap[key] })).reverse();
+
+            container.innerHTML = "";
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                div.innerHTML = `
+                    <div class="history-info">
+                        <span>🕒 ${item.time || 'ไม่ระบุเวลา'}</span>
+                        <button class="btn-delete" onclick="deleteHistoryItem('${item.id}')">ลบ</button>
+                    </div>
+                    <div class="history-text">${item.text}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
     </script>
 </body>
 </html>
