@@ -674,20 +674,29 @@
 
       // --- 4. จัดการกฎ / ค่าปรับ ---
         let collapsedState = {};
-
-        function formatFineInput(value) {
+function formatFineInput(value) {
             if (!value) return '';
-            let match = value.match(/^([0-9,]+)\s*([\+\/\-].*)$/);
-            if (match) {
-                let cleanNum = match[1].replace(/[^0-9]/g, '');
-                if (cleanNum === '') return value;
-                let num = parseInt(cleanNum, 10);
-                return num.toLocaleString() + ' ' + match[2].trim();
-            } else {
-                let cleanNum = value.replace(/[^0-9]/g, '');
-                if (cleanNum === '' || isNaN(cleanNum)) return value;
-                return parseInt(cleanNum, 10).toLocaleString();
-            }
+            
+            // ค้นหาตำแหน่งของตัวเลขชุดแรกในข้อความ
+            let numMatch = value.match(/[0-9,]+/);
+            
+            // ถ้าไม่พบตัวเลขเลย (เช่น พิมพ์ว่า "ตักเตือน" เฉยๆ) ให้คืนค่าข้อความนั้นกลับไปตรงๆ
+            if (!numMatch) return value.trim();
+
+            let numStr = numMatch[0];
+            let numIndex = value.indexOf(numStr);
+            
+            // แยกข้อความส่วนหน้า, ตัวเลข, และส่วนท้าย (ถ้ามี)
+            let prefix = value.substring(0, numIndex);
+            let suffix = value.substring(numIndex + numStr.length);
+
+            // แปลงตัวเลขให้ใส่ comma คั่นหลักพันตามปกติ
+            let cleanNum = numStr.replace(/[^0-9]/g, '');
+            if (cleanNum === '') return value;
+            let formattedNum = parseInt(cleanNum, 10).toLocaleString();
+
+            // รวมร่างกลับเป็น [ข้อความหน้า] + [ตัวเลขจัดรูปแบบ] + [ข้อความหลัง]
+            return prefix + formattedNum + suffix;
         }
 
         const ruleFineInputElem = document.getElementById('ruleFine');
