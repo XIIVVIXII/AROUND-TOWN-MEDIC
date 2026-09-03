@@ -366,8 +366,10 @@
         const btnGame = document.getElementById('btnGame');
         const btnDiscord = document.getElementById('btnDiscord');
 
-        let appData = { gangs: [], families: [], citizens: [], doctors: [], rules: [] };
-        let historyData = JSON.parse(localStorage.getItem('hospital_fine_history')) || [];
+      let appData = { gangs: [], families: [], citizens: [], doctors: [], rules: [] };
+        
+        // คงโค้ดเดิมไว้ (แต่เราจะดึงข้อมูลผ่าน Firebase ทับค่าเริ่มต้นแทน)
+        let historyData = [];
 
         onValue(ref(db, 'aroundTown'), (snapshot) => {
             const data = snapshot.val() || {};
@@ -382,6 +384,26 @@
             renderCategoryOptions();
             renderRuleOptions();
             updatePreviews();
+        });
+
+        // [เพิ่มใหม่] ฟังข้อมูลประวัติแบบ Real-time ข้ามเครื่องจาก Firebase
+        onValue(ref(db, 'aroundTown/history'), (snapshot) => {
+            const data = snapshot.val() || {};
+            // แปลงข้อมูลจาก Firebase Object กลับเป็น Array ของประวัติ
+            historyData = Array.isArray(data) ? data : Object.values(data);
+            
+            // เรียงจากใหม่ไปเก่า (ให้รายการล่าสุดขึ้นก่อน)
+            historyData.reverse();
+            
+            // จำกัดจำนวนไม่ให้เกิน 50 รายการ (ถ้าเกินตัดตัวเก่าสุดออก)
+            if (historyData.length > 50) {
+                historyData = historyData.slice(0, 50);
+            }
+
+            updateHistoryCount();
+            if (document.getElementById('tabHistory').classList.contains('active')) {
+                renderHistory();
+            }
         });
 
         function parseFirebaseData(items) {
@@ -511,18 +533,16 @@
             updatePreviews();
         }
 
-function formatAmountWithIC(val) {
+        function formatAmountWithIC(val) {
             if (!val) return '';
             let cleanVal = val.replace(/IC/gi, '').trim();
             
-            // ค้นหาตัวเลขกลุ่มแรก (จำนวนเงินตัวแรก)
             let matchNum = cleanVal.match(/([0-9,]+)/);
             if (!matchNum) return cleanVal;
             
             let rawNum = matchNum[1].replace(/[^0-9]/g, '');
             let formattedNum = Number(rawNum).toLocaleString('en-US');
             
-            // ตัดเอาตัวเลขตัวแรกออก แล้วเก็บข้อความหรือเครื่องหมายที่เหลือไว้ทั้งหมดแบบตรงเป๊ะ
             let restOfText = cleanVal.replace(matchNum[1], '').trim();
             
             if (restOfText) {
@@ -531,7 +551,6 @@ function formatAmountWithIC(val) {
                 return `${formattedNum} IC`;
             }
         }
-
 
         window.onTargetTypeChange = function() {
             const val = targetTypeSelect.value;
@@ -607,12 +626,14 @@ function formatAmountWithIC(val) {
 
         setInterval(updatePreviews, 1000);
 
+        // [ปรับแก้เล็กน้อยเพื่อให้บันทึกลง Firebase แทน localStorage เพื่อให้เห็นตรงกันทุกเครื่อง]
+        import { push, remove } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-database.js";
+
         function saveToHistory() {
             const record = { discordText: previewDiscord.textContent };
-            historyData.unshift(record);
-            if (historyData.length > 50) historyData.pop();
-            localStorage.setItem('hospital_fine_history', JSON.stringify(historyData));
-            updateHistoryCount();
+            // ส่งข้อมูลไปเก็บที่ Firebase แทน localStorage
+            const historyRef = ref(db, 'aroundTown/history');
+            push(historyRef, record);
         }
 
         window.updateHistoryCount = function() {
@@ -649,11 +670,11 @@ function formatAmountWithIC(val) {
 
         window.clearHistory = function() {
             if (confirm('คุณต้องการล้างประวัติทั้งหมดใช่หรือไม่?')) {
-                historyData = [];
-                localStorage.removeItem('hospital_fine_history');
-                renderHistory();
-                updateHistoryCount();
-                showToast("ล้างประวัติสำเร็จ!");
+                // ลบข้อมูลประวัติทั้งหมดจาก Firebase (ล้างหมดทุกคนพร้อมกัน)
+                const historyRef = ref(db, 'aroundTown/history');
+                remove(historyRef).then(() => {
+                    showToast("ล้างประวัติสำเร็จ!");
+                });
             }
         }
 
@@ -689,7 +710,6 @@ function formatAmountWithIC(val) {
                 updateHistoryCount();
             });
         }
-
         updateHistoryCount();
     </script>
 </body>
