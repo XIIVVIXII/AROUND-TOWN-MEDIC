@@ -798,13 +798,13 @@
         }
     };
 
-    function clearHistory() {
-        if (confirm('คุณต้องการล้างประวัติทั้งหมดจากฐานข้อมูลใช่หรือไม่?')) {
-            set(historyRef, null).then(() => {
-                showToast("ล้างประวัติสำเร็จ!");
-            });
-        }
+  function clearHistory() {
+    if (confirm('คุณต้องการล้างประวัติทั้งหมดจากฐานข้อมูลใช่หรือไม่?')) {
+        set(historyRef, null).then(() => {
+            showToast("ล้างประวัติสำเร็จ!");
+        });
     }
+}
     window.clearHistory = clearHistory;
 
     function showToast(message) {
@@ -842,3 +842,5 @@
 
     toggleNoticeFields();
 </script>
+</body>
+</html>
