@@ -535,22 +535,39 @@
 
         function formatAmountWithIC(val) {
             if (!val) return '';
-            let cleanVal = val.replace(/IC/gi, '').trim();
+            let cleanVal = val.trim();
             
-            let matchNum = cleanVal.match(/([0-9,]+)/);
-            if (!matchNum) return cleanVal;
+            // เช็คว่าตัวอักษรตัวแรกสุดเป็นตัวเลขหรือไม่ (0-9)
+            let isStartsWithNumber = /^[0-9]/.test(cleanVal);
             
-            let rawNum = matchNum[1].replace(/[^0-9]/g, '');
-            let formattedNum = Number(rawNum).toLocaleString('en-US');
-            
-            let restOfText = cleanVal.replace(matchNum[1], '').trim();
-            
-            if (restOfText) {
-                return `${formattedNum} IC ${restOfText}`;
-            } else {
-                return `${formattedNum} IC`;
+            // ถ้าขึ้นต้นด้วยตัวเลข ให้ใส่ IC ตามเดิม (ลบ IC เก่าออกก่อนกันซ้ำ)
+            if (isStartsWithNumber) {
+                let tempVal = cleanVal.replace(/IC/gi, '').trim();
+                let matchNum = tempVal.match(/([0-9,]+)/);
+                if (!matchNum) return cleanVal;
+                
+                let rawNum = matchNum[1].replace(/[^0-9]/g, '');
+                let formattedNum = Number(rawNum).toLocaleString('en-US');
+                let restOfText = tempVal.replace(matchNum[1], '').trim();
+                
+                if (restOfText) {
+                    return `${formattedNum} IC ${restOfText}`;
+                } else {
+                    return `${formattedNum} IC`;
+                }
+            } 
+            // ถ้าขึ้นต้นด้วยตัวอักษร ให้จัดรูปแบบตัวเลขข้างในแต่ไม่ต้องเติม IC
+            else {
+                let matchNum = cleanVal.match(/([0-9,]+)/);
+                if (!matchNum) return cleanVal;
+                
+                let rawNum = matchNum[1].replace(/[^0-9]/g, '');
+                let formattedNum = Number(rawNum).toLocaleString('en-US');
+                
+                return cleanVal.replace(matchNum[1], formattedNum);
             }
         }
+        
 
         window.onTargetTypeChange = function() {
             const val = targetTypeSelect.value;
