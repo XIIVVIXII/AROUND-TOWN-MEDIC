@@ -411,7 +411,7 @@
         let rulesData = [];
         let locationsData = [];
 
-   // --- โหลดข้อมูลจาก Firebase Realtime Database (แยกตาม path ย่อยเพื่อความปลอดภัย) ---
+// --- โหลดข้อมูลจาก Firebase Realtime Database (แยกตาม path ย่อยเพื่อความปลอดภัย) ---
         onValue(ref(db, 'aroundTown/doctors'), (snapshot) => {
             doctorsData = snapshot.val() || [];
             renderDoctors();
@@ -443,14 +443,15 @@
             alert("ไม่สามารถเชื่อมต่อกับฐานข้อมูล Firebase ได้");
         });
 
-        function saveDataToFirebase() {
-            set(ref(db, 'aroundTown'), {
-                doctors: doctorsData,
-                citizens: citizensData,
-                commands: commandsData,
-                rules: rulesData,
-                locations: locationsData
-            }).catch((error) => {
+  function saveDataToFirebase() {
+            // บันทึกเฉพาะข้อมูลในส่วนที่หน้านี้รับผิดชอบ โดยไม่ไปยุ่งกับข้อมูลส่วนอื่น
+            Promise.all([
+                set(ref(db, 'aroundTown/doctors'), doctorsData),
+                set(ref(db, 'aroundTown/citizens'), citizensData),
+                set(ref(db, 'aroundTown/commands'), commandsData),
+                set(ref(db, 'aroundTown/rules'), rulesData),
+                set(ref(db, 'aroundTown/locations'), locationsData)
+            ]).catch((error) => {
                 console.error("Save error: ", error);
                 alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล");
             });
