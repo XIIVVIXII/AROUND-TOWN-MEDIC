@@ -205,7 +205,7 @@
         let selectedQueueName = "";
         let selectedTimerName = "";
 
-// ดึงรายชื่อหมอ
+        // ดึงรายชื่อหมอ
         function fetchDoctorsFromFirebase() {
             const doctorsRef = ref(db, 'aroundTown/doctors');
             onValue(doctorsRef, (snapshot) => {
