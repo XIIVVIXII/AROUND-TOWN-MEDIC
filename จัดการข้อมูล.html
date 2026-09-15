@@ -411,14 +411,27 @@
         let rulesData = [];
         let locationsData = [];
 
-        // --- โหลดข้อมูลจาก Firebase Realtime Database ---
-        onValue(ref(db, 'aroundTown'), (snapshot) => {
-            const data = snapshot.val() || {};
-            doctorsData = data.doctors || [];
-            citizensData = data.citizens || [];
-            commandsData = data.commands || [];
-            rulesData = data.rules || [];
-            locationsData = data.locations || [];
+   // --- โหลดข้อมูลจาก Firebase Realtime Database (แยกตาม path ย่อยเพื่อความปลอดภัย) ---
+        onValue(ref(db, 'aroundTown/doctors'), (snapshot) => {
+            doctorsData = snapshot.val() || [];
+            renderDoctors();
+        });
+        onValue(ref(db, 'aroundTown/citizens'), (snapshot) => {
+            citizensData = snapshot.val() || [];
+            renderCitizens();
+        });
+        onValue(ref(db, 'aroundTown/commands'), (snapshot) => {
+            commandsData = snapshot.val() || [];
+            renderCommands();
+        });
+        onValue(ref(db, 'aroundTown/rules'), (snapshot) => {
+            rulesData = snapshot.val() || [];
+            renderRules();
+        });
+        onValue(ref(db, 'aroundTown/locations'), (snapshot) => {
+            locationsData = snapshot.val() || [];
+            renderLocations();
+        
 
             renderDoctors();
             renderCitizens();
