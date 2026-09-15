@@ -205,7 +205,7 @@
         let selectedQueueName = "";
         let selectedTimerName = "";
 
-        // ดึงรายชื่อหมอ
+// ดึงรายชื่อหมอ
         function fetchDoctorsFromFirebase() {
             const doctorsRef = ref(db, 'aroundTown/doctors');
             onValue(doctorsRef, (snapshot) => {
@@ -220,7 +220,7 @@
             });
         }
 
-        // ดึงข้อมูลคิวจาก Firebase (เพื่อให้คงอยู่ตลอด)
+        // ดึงข้อมูลคิวจาก Firebase
         function fetchQueueFromFirebase() {
             const queueRef = ref(db, 'aroundTown/queueList');
             onValue(queueRef, (snapshot) => {
@@ -230,7 +230,7 @@
             });
         }
 
-        // ดึงข้อมูลกำลังจับเวลาจาก Firebase (เพื่อให้คงอยู่ตลอด)
+        // ดึงข้อมูลกำลังจับเวลาจาก Firebase
         function fetchActiveRunningFromFirebase() {
             const runningRef = ref(db, 'aroundTown/activeRunning');
             onValue(runningRef, (snapshot) => {
@@ -240,7 +240,7 @@
             });
         }
 
-        // ดึงข้อมูลประวัติจาก Firebase (เพิ่มเข้ามาเพื่อให้ซิงค์ประวัติพร้อมกัน)
+        // ดึงข้อมูลประวัติจาก Firebase
         function fetchHistoryFromFirebase() {
             const historyRef = ref(db, 'aroundTown/historyData');
             onValue(historyRef, (snapshot) => {
@@ -250,25 +250,25 @@
             });
         }
 
-        // บันทึกคิวลง Firebase
+        // --- ฟังก์ชันสำหรับบันทึกข้อมูลลง Firebase ---
         function saveQueueToFirebase() {
             set(ref(db, 'aroundTown/queueList'), queueList);
         }
 
-        // บันทึกกำลังจับเวลาลง Firebase
         function saveActiveRunningToFirebase() {
             set(ref(db, 'aroundTown/activeRunning'), activeRunning);
         }
 
-        // บันทึกประวัติลง Firebase (เพิ่มเข้ามา)
         function saveHistoryToFirebase() {
             set(ref(db, 'aroundTown/historyData'), historyData);
         }
-
+        
+        // เรียกใช้งานการดึงข้อมูลทั้งหมด
         fetchDoctorsFromFirebase();
         fetchQueueFromFirebase();
         fetchActiveRunningFromFirebase();
-        fetchHistoryFromFirebase(); // เรียกใช้งานการดึงประวัติ
+        fetchHistoryFromFirebase();
+
 
         function formatThaiDate(isoStr) {
             if (!isoStr) return "";
