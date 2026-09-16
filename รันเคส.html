@@ -30,30 +30,32 @@
         </div>
     </header>
 
-    <!-- Main Content Container -->
+<!-- Main Content Container -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-1 w-full">
-
         <!-- หน้า 2. รันเคส / จัดคิว -->
         <section id="tab-queue" class="space-y-6">
-            
             <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
-                
                 <!-- ฝั่งซ้าย (3 ส่วน): ตารางหลักและเครื่องมือ -->
                 <div class="xl:col-span-3 bg-[#140814] border border-pink-900/40 p-6 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                    
-                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 pb-4 border-b border-pink-900/30 gap-4">
-                        <span class="text-pink-500 font-medium text-base flex items-center gap-2">
-                            <span class="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(219,39,119,0.8)]"></span> 
-                            หน้า 2. รันเคส / จัดคิว 
-                        </span>
-                        <div class="flex items-center gap-4 text-sm text-pink-200">
-                            <label class="flex items-center gap-2 cursor-pointer select-none">
-                                <input type="checkbox" id="toggle-delete-btn" checked onchange="toggleDeleteButtons()" class="accent-pink-600 w-4 h-4 rounded">
-                                แสดงปุ่มลบทั้งหมด
-                            </label>
-                        </div>
-                    </div>
+                   <span class="text-pink-500 font-medium text-base flex items-center gap-2">
+    <span class="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(219,39,119,0.8)]"></span>
+    หน้า 2. รันเคส / จัดคิว
+</span>
+<div class="flex items-center gap-4 text-sm text-pink-200">
+    <button onclick="resetAllQueues()" class="bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-[0_0_8px_rgba(244,63,94,0.3)]">
+        🔄 รีเซ็ตคิวทั้งหมด
+    </button>
+    <label class="flex items-center gap-2 cursor-pointer select-none">
+        แสดงปุ่มลบทั้งหมด
+         <input type="checkbox" id="toggle-delete-btn" checked onchange="toggleDeleteButtons()" class="accent-pink-600 w-4 h-4 rounded">
+    </label>
+</div> 
 
+
+
+
+
+    <!-- ส่วนเนื้อหาตารางถัดไปข้างล่าง... -->
                     <!-- ส่วนค้นหาและเพิ่มชื่อ -->
                     <div class="flex flex-col md:flex-row gap-3 items-center justify-between bg-[#1a0b1a] p-4 rounded-xl border border-pink-900/30 mb-6">
                         <div class="relative w-full md:w-96">
@@ -87,10 +89,13 @@
 
                 <!-- ฝั่งขวานอกกรอบ (1 ส่วน): ช่องสถานะไม่อยู่ ชิดขวาเต็มพื้นที่ว่าง -->
                 <div class="xl:col-span-1 bg-[#140814] border border-pink-900/40 p-5 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)] sticky top-6">
-                    <h3 class="text-sm font-medium text-slate-300 mb-3 flex items-center justify-between border-b border-pink-900/30 pb-3">
-                        <span>🚫 รายชื่อสถานะ "ไม่อยู่"</span>
-                        <span id="absent-count" class="bg-slate-900 text-slate-400 text-xs px-2 py-0.5 rounded-full">0</span>
-                    </h3>
+                   <h3 class="text-sm font-medium text-slate-300 mb-3 flex items-center justify-between border-b border-pink-900/30 pb-3">
+    <div class="flex items-center gap-2">
+        <span>🚫 รายชื่อสถานะ "ไม่อยู่"</span>
+        <button onclick="resetAbsentOnly()" class="bg-sky-950/60 hover:bg-sky-900 text-sky-300 border border-sky-800/50 px-2 py-0.5 rounded-lg text-[10px] transition-all">รีเซ็ตไม่อยู่</button>
+    </div>
+    <span id="absent-count" class="bg-slate-900 text-slate-400 text-xs px-2 py-0.5 rounded-full">0</span>
+</h3>
                     <div id="absent-container" class="space-y-2.5 max-h-[500px] overflow-y-auto">
                         <div class="text-xs text-slate-500 text-center py-8">ไม่มีรายชื่อที่สถานะไม่อยู่</div>
                     </div>
@@ -499,8 +504,8 @@
                                 <button onclick="setWarningCase(${item.id})" class="bg-amber-950/60 hover:bg-amber-900 text-amber-300 border border-amber-800/50 px-2.5 py-1.5 rounded-lg text-xs transition-all">⚠️</button>
                             </div>
                         `;
-                    } else {
-                        subStatusHtml = `<div class="text-xs text-pink-300/40 mt-0.5">รอคิวถัดไป</div>`;
+                 } else {
+        subStatusHtml = `<div class="text-xs text-sky-400 mt-0.5">รอคิวถัดไป</div>`;
                         actionButtonsHtml = `
                             <div class="flex items-center gap-2">
                                 <button onclick="startRunCase(${item.id})" class="bg-pink-600/70 hover:bg-pink-500 text-white px-3.5 py-1.5 rounded-lg text-xs font-medium transition-all shadow-[0_0_8px_rgba(219,39,119,0.3)] flex items-center gap-1.5">
@@ -735,6 +740,28 @@
             saveHistoryToFirebase(); // ลบและเคลียร์ประวัติพร้อมกันบน Firebase
             renderHistoryTable();
         }
+
+        // รีเซ็ตคิวทั้งหมด (ทั้งพร้อมรับเคส และ ไม่อยู่) ให้กลับเป็นสถานะเริ่มต้น
+        window.resetAllQueues = function() {
+            queueList.forEach(item => {
+                item.status = "พร้อมรับเคส";
+                item.state = "normal";
+            });
+            saveQueueToFirebase();
+            renderQueueTable();
+        };
+
+        // รีเซ็ตเฉพาะรายชื่อที่มีสถานะ "ไม่อยู่" ให้กลับมาเป็น พร้อมรับเคส และเป็นสถานะปกติ
+        window.resetAbsentOnly = function() {
+            queueList.forEach(item => {
+                if (item.status === "ไม่อยู่") {
+                    item.status = "พร้อมรับเคส";
+                    item.state = "normal";
+                }
+            });
+            saveQueueToFirebase();
+            renderQueueTable();
+        };
     </script>
 </body>
 </html>
