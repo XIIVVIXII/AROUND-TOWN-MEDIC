@@ -37,22 +37,24 @@
             <div class="grid grid-cols-1 xl:grid-cols-4 gap-6 items-start">
                 <!-- ฝั่งซ้าย (3 ส่วน): ตารางหลักและเครื่องมือ -->
                 <div class="xl:col-span-3 bg-[#140814] border border-pink-900/40 p-6 rounded-2xl shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                   <span class="text-pink-500 font-medium text-base flex items-center gap-2">
-    <span class="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(219,39,119,0.8)]"></span>
-    หน้า 2. รันเคส / จัดคิว
-</span>
-<div class="flex items-center gap-4 text-sm text-pink-200">
-    <button onclick="resetAllQueues()" class="bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-[0_0_8px_rgba(244,63,94,0.3)]">
-        🔄 รีเซ็ตคิวทั้งหมด
-    </button>
-    <label class="flex items-center gap-2 cursor-pointer select-none">
-        แสดงปุ่มลบทั้งหมด
-         <input type="checkbox" id="toggle-delete-btn" checked onchange="toggleDeleteButtons()" class="accent-pink-600 w-4 h-4 rounded">
-    </label>
-</div> 
+                   
+                   <!-- จัดหัวข้อให้อยู่ซ้าย และ 2 ปุ่มไปอยู่ขวาในบรรทัดเดียวกัน -->
+                   <div class="flex flex-wrap items-center justify-between gap-4 mb-4">
+                       <span class="text-pink-500 font-medium text-base flex items-center gap-2">
+                           <span class="w-2.5 h-2.5 rounded-full bg-pink-500 shadow-[0_0_8px_rgba(219,39,119,0.8)]"></span>
+                           หน้า 2. รันเคส / จัดคิว
+                       </span>
 
-
-
+                       <div class="flex items-center gap-4 text-sm text-pink-200">
+                           <button onclick="resetAllQueues()" class="bg-rose-950/60 hover:bg-rose-900 text-rose-300 border border-rose-800/50 px-3 py-1.5 rounded-xl text-xs transition-all flex items-center gap-1 shadow-[0_0_8px_rgba(244,63,94,0.3)]">
+                               🔄 รีเซ็ตคิวทั้งหมด
+                           </button>
+                           <label class="flex items-center gap-2 cursor-pointer select-none">
+                               แสดงปุ่มลบทั้งหมด
+                               <input type="checkbox" id="toggle-delete-btn" checked onchange="toggleDeleteButtons()" class="accent-pink-600 w-4 h-4 rounded">
+                           </label>
+                       </div>
+                   </div>
 
 
     <!-- ส่วนเนื้อหาตารางถัดไปข้างล่าง... -->
